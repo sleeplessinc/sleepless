@@ -60,5 +60,4 @@ Number.prototype.toBucks = function() { return ( (""+(this + 0.5)).toint() /100)
 // 10.50500 -> 1051 
 Number.prototype.toCents = function() { return Math.floor((this + 0.005) * 100) }
 
-exports.version = "sleepless.js 1.0"
 
