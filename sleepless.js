@@ -20,13 +20,24 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
-exports.o2j = function(o) { return JSON.stringify(o) }
-exports.j2o(j) { try { return JSON.parse(j) } catch(e) { } return null }
-exports.millis() { return new Date().getTime() }
-exports.time() { return Math.floor(millis() / 1000) }
-exports.pint(n) { return parseInt(n) || 0 }
-exports.pflt(n) { return parseFloat(n) || 0 }
+if((typeof process) === 'undefined')
+	isNode = !(isPage = true)
+else 
+	isPage = !(isNode = true)
 
+if(isPage) {
+	global = window
+}
+else {
+}
+
+// -----
+
+global.millis = function() { return new Date().getTime() }
+global.time = function() { return Math.floor(millis() / 1000) }
+
+Object.prototype.json = function() { return JSON.stringify(this) }
+String.prototype.obj = function() { try { return JSON.parse(this) } catch(e) { } return null }
 
 String.prototype.lower = function() { return this.toLowerCase() }
 String.prototype.upper = function() { return this.toUpperCase() }
@@ -41,9 +52,13 @@ String.prototype.cap = String.prototype.cap || function() {
 }
 
 
-// 1050 -> 10.50 
-exports.toBucks = function(n) { return (pint(""+(n+0.5))/100).toFixed(2) }
-// 10.50500 -> 1051 
-exports.toCents = function(n) { return Math.floor((n + 0.005) * 100) }
+String.prototype.toint = function() { return parseInt(this) || 0 }
+String.prototype.toflt = function() { return parseFloat(this) || 0 }
 
+// 1050 -> 10.50 
+Number.prototype.toBucks = function() { return ( (""+(this + 0.5)).toint() /100).toFixed(2) }
+// 10.50500 -> 1051 
+Number.prototype.toCents = function() { return Math.floor((this + 0.005) * 100) }
+
+exports.version = "sleepless.js 1.0"
 
