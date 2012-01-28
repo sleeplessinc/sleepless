@@ -44,8 +44,8 @@ String.prototype.upper = function() { return this.toUpperCase() }
 String.prototype.trim = String.prototype.trim || function() {
 	return this.replace(/^\s+/gi, "").replace(/\s+$/gi, "")
 }
-String.prototype.abbr = String.prototype.abbr || function(l) {
-	return this.length > l ? this.substring(0, l - 4)+" ..." : this
+String.prototype.abbr = String.prototype.abbr || function(l, s) {
+	return this.length > l ? this.substring(0, l - 4)+(s || " ...") : this
 }
 String.prototype.cap = String.prototype.cap || function() {
 	return this.substring(0,1).toUpperCase() + this.substring(1)
@@ -55,9 +55,7 @@ String.prototype.cap = String.prototype.cap || function() {
 String.prototype.toint = function() { return parseInt(this) || 0 }
 String.prototype.toflt = function() { return parseFloat(this) || 0 }
 
-// 1050 -> 10.50 
 Number.prototype.toBucks = function() { return ( (""+(this + 0.5)).toint() /100).toFixed(2) }
-// 10.50500 -> 1051 
 Number.prototype.toCents = function() { return Math.floor((this + 0.005) * 100) }
 
 

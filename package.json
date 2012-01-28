@@ -1,7 +1,7 @@
 {
 	"name": "sleepless",
-	"version": "1.0.1",
-	"description" : "Misc. open source code from Sleepless Software Inc.",
+	"version": "1.0.2",
+	"description" : "Misc. open source code from http://sleepless.com",
 	"author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
 	"license": {
 		"type": "MIT",
