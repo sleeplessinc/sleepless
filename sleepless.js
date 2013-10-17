@@ -76,4 +76,17 @@ String.prototype.ucwords = function( sep ) {
 	}
 	return a.join( " " );
 }
-
+// -------
+if(isNode) {
+	// node
+	global.getFile = function(path, cb) {
+		var fs = require("fs");
+		if(!cb) {
+			return fs.readFileSync(path);
+		}
+		fs.readFile(path, cb);
+	}
+}
+else  {
+	// browser
+}
