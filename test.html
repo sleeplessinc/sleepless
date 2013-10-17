@@ -6,21 +6,36 @@
 			document.write(s+"<br>")
 		}
 
-		l("millis="+millis())
-		l("time="+time())
-		l({x:7}.json())
-		l("{\"x\":[1,2]}".obj())
-		l(".lower "+"JoE".lower())
-		l(".upper "+"Joe".upper())
-		l(".cap "+"joE".cap())
-		l(".abbr "+"joe hitchens".abbr(10))
-		l(".trim "+" \tjoe hitchens \n".trim())
-		var s = "3.1415"
-		l(".toint "+s.toint())
-		l(".toflt "+s.toflt())
-		var n = 3.1415
-		l(".toBucks "+n.toBucks())
-		l(".toCents "+n.toCents())
+		o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
+		j = JSON.stringify(o);
+
+		throwIf( o.json() !== j );
+		throwIf( j.obj().json() !== j );
+
+		throwIf( "foO".lower() !== "foo" );
+		throwIf( "foO".upper() !== "FOO" );
+		throwIf( "foO".cap() !== "FoO" );
+		throwIf( "foO".ucfirst() !== "FoO" );
+		throwIf( "foo baR".ucwords() !== "Foo BaR" );
+		throwIf( "foo bar baz".abbr(7) !== "foo ..." );
+		throwIf( "foo".abbr(7) != "foo" );		// XXX why doesn't this work with !== ?
+		throwIf( " \tfoo bar \n".trim() !== "foo bar" );
+		throwIf( "3.1415".toInt() !== 3 );
+		throwIf( "3.1415".toFloat() !== 3.1415 );
+
+		throwIf( "0.01".toMoney() !== "0.01", "0.01".toMoney());
+		throwIf( "31415.015".toMoney() !== "31,415.02", "31415.015".toMoney());
+		throwIf( "31415.01".toMoney() !== "31,415.01" );
+		throwIf( "31415.99".toMoney() !== "31,415.99" );
+		throwIf( (0.01).toMoney() !== "0.01");
+		throwIf( (31415.015).toMoney() !== "31,415.02");
+		throwIf( (31415.01).toMoney() !== "31,415.01" );
+		throwIf( (31415.99).toMoney() !== "31,415.99" );
+		throwIf( (-0.01).toMoney() !== "-0.01", (-0.01).toMoney());
+		throwIf( (-31415.016).toMoney() !== "-31,415.02", (-31415.015).toMoney());
+		throwIf( (-31415.01).toMoney() !== "-31,415.01" );
+		throwIf( (-31415.99).toMoney() !== "-31,415.99" );
+
 	</script>
 </body>
 </html>
