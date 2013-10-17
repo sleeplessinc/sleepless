@@ -20,42 +20,51 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
-if((typeof process) === 'undefined')
-	isNode = !(isPage = true)
-else 
-	isPage = !(isNode = true)
-
-if(isPage) {
+if((typeof process) === 'undefined') {
+	// browser
+	isBrowser = true;
+	isNode = false;
 	global = window
 }
-else {
+else  {
+	// node
+	isNode = true;
+	isBrowser = false;
 }
-
-// -----
-
+// -------
+global.nop = function(){}
 global.millis = function() { return new Date().getTime() }
 global.time = function() { return Math.floor(millis() / 1000) }
-
-Object.prototype.json = function() { return JSON.stringify(this) }
-String.prototype.obj = function() { try { return JSON.parse(this) } catch(e) { } return null }
-
+global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
+global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
+global.p10(v) { return parseInt(v, 10) || 0 }
+global.pflt(v) { return parseFloat(v) || 0.0 }
+// -------
+Object.prototype.json = function() { return o2j(this); }
+// -------
+String.prototype.trim = String.prototype.trim || function() {return this.replace(/^\s+|\s+$/g, "")}
+String.prototype.obj = function() { return j2o(this); }
 String.prototype.lower = function() { return this.toLowerCase() }
 String.prototype.upper = function() { return this.toUpperCase() }
-String.prototype.trim = String.prototype.trim || function() {
-	return this.replace(/^\s+/gi, "").replace(/\s+$/gi, "")
-}
-String.prototype.abbr = String.prototype.abbr || function(l, s) {
+String.prototype.abbr = function(l, s) {
 	return this.length > l ? this.substring(0, l - 4)+(s || " ...") : this
 }
-String.prototype.cap = String.prototype.cap || function() {
+String.prototype.toInt = function() { return p10(this); }
+String.prototype.toFlt = function() { return pflt(this); }
+String.prototype.ucfirst = function() {
 	return this.substring(0,1).toUpperCase() + this.substring(1)
 }
+String.prototype.ucwords = function( sep ) {
+	sep = sep || /[\s]+/;
+	var a = this.split( sep );
+	for( var i = 0; i < a.length; i++ ) {
+		a[ i ] = a[ i ].ucfirst();
+	}
+	return a.join( " " );
+}
 
-
-String.prototype.toint = function() { return parseInt(this) || 0 }
-String.prototype.toflt = function() { return parseFloat(this) || 0 }
-
-Number.prototype.toBucks = function() { return ( (""+(this + 0.5)).toint() /100).toFixed(2) }
+// -------
+Number.prototype.toBucks = function() { return ( (""+(this + 0.5)).toInt() /100).toFixed(2) }
 Number.prototype.toCents = function() { return Math.floor((this + 0.005) * 100) }
 
 
