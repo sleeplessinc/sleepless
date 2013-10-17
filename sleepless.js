@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Sleepless Software Inc. All rights reserved.
+Copyright 2013 Sleepless Software Inc. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -32,26 +32,40 @@ else  {
 	isBrowser = false;
 }
 // -------
+global.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
 global.nop = function(){}
 global.millis = function() { return new Date().getTime() }
 global.time = function() { return Math.floor(millis() / 1000) }
 global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
-global.p10(v) { return parseInt(v, 10) || 0 }
-global.pflt(v) { return parseFloat(v) || 0.0 }
+global.p10 = function(v) { return parseInt(""+v, 10) || 0 }
+global.pflt = function(v) { return parseFloat(""+v) || 0.0 }
+global.log = function(m) { return console.log(m); }
 // -------
 Object.prototype.json = function() { return o2j(this); }
+Object.prototype.toInt = function() { return p10(this.toString()) }
+Object.prototype.toFloat = function() { return pflt(this.toString()) }
+Object.prototype.toMoney = function(decPoint, thousandsSep) {
+	var n = Math.round( this.toFloat() * 100 ) / 100;
+    var sign = n < 0 ? '-' : '';
+    n = Math.abs(+n || 0);
+    var intPart = parseInt(n.toFixed(2), 10) + '';
+    var j = intPart.length > 3 ? intPart.length % 3 : 0;
+    return sign + (j ? intPart.substr(0, j) + "," : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + ",") + (2 ? "." + Math.abs(n - intPart).toFixed(2).slice(2) : '');
+};
 // -------
 String.prototype.trim = String.prototype.trim || function() {return this.replace(/^\s+|\s+$/g, "")}
 String.prototype.obj = function() { return j2o(this); }
 String.prototype.lower = function() { return this.toLowerCase() }
 String.prototype.upper = function() { return this.toUpperCase() }
-String.prototype.abbr = function(l, s) {
-	return this.length > l ? this.substring(0, l - 4)+(s || " ...") : this
+String.prototype.abbr = function(l) {
+	l = p10(l) || 5;
+	if(this.length <= l) {
+		return this;
+	}
+	return this.substr(0, l - 4) + " ...";
 }
-String.prototype.toInt = function() { return p10(this); }
-String.prototype.toFlt = function() { return pflt(this); }
-String.prototype.ucfirst = function() {
+String.prototype.cap = String.prototype.ucfirst = function() {
 	return this.substring(0,1).toUpperCase() + this.substring(1)
 }
 String.prototype.ucwords = function( sep ) {
@@ -62,9 +76,4 @@ String.prototype.ucwords = function( sep ) {
 	}
 	return a.join( " " );
 }
-
-// -------
-Number.prototype.toBucks = function() { return ( (""+(this + 0.5)).toInt() /100).toFixed(2) }
-Number.prototype.toCents = function() { return Math.floor((this + 0.005) * 100) }
-
 
