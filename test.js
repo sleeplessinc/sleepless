@@ -19,16 +19,21 @@ throwIf( " \tfoo bar \n".trim() !== "foo bar" );
 throwIf( "3.1415".toInt() !== 3 );
 throwIf( "3.1415".toFloat() !== 3.1415 );
 
-throwIf( "0.01".toMoney() !== "0.01", "0.01".toMoney());
-throwIf( "31415.015".toMoney() !== "31,415.02", "31415.015".toMoney());
+throwIf( "0.01".toMoney() !== "0.01", "0.01" );
+throwIf( "31415.015".toMoney() !== "31,415.02" );
 throwIf( "31415.01".toMoney() !== "31,415.01" );
 throwIf( "31415.99".toMoney() !== "31,415.99" );
 throwIf( (0.01).toMoney() !== "0.01");
 throwIf( (31415.015).toMoney() !== "31,415.02");
 throwIf( (31415.01).toMoney() !== "31,415.01" );
 throwIf( (31415.99).toMoney() !== "31,415.99" );
-throwIf( (-0.01).toMoney() !== "-0.01", (-0.01).toMoney());
-throwIf( (-31415.016).toMoney() !== "-31,415.02", (-31415.015).toMoney());
+throwIf( (-0.01).toMoney() !== "-0.01" );
+throwIf( (-31415.016).toMoney() !== "-31,415.02" );
 throwIf( (-31415.01).toMoney() !== "-31,415.01" );
 throwIf( (-31415.99).toMoney() !== "-31,415.99" );
+
+getFile("test.js", function(err, data) {
+	throwIf( err, err );
+	throwIf( getFile("test.js").toString() !== data.toString() );
+});
 

@@ -79,6 +79,8 @@ String.prototype.ucwords = function( sep ) {
 // -------
 if(isNode) {
 	// node
+
+	// XXX make XHR version of this for browser?
 	global.getFile = function(path, cb) {
 		var fs = require("fs");
 		if(!cb) {
