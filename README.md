@@ -1,3 +1,4 @@
 
-Some general purpose Javascript functions
+
+Sleepless Inc.'s commonly used Javascript enhancement code
 
