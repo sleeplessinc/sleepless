@@ -34,8 +34,7 @@ else  {
 // -------
 global.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
 global.nop = function(){}
-global.millis = function() { return new Date().getTime() }
-global.time = function() { return Math.floor(millis() / 1000) }
+global.time = function() { return (new Date).uts() }
 global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 global.p10 = function(v) { return parseInt(""+v, 10) || 0 }
@@ -53,6 +52,9 @@ Object.prototype.toMoney = function(decPoint, thousandsSep) {
     var j = intPart.length > 3 ? intPart.length % 3 : 0;
     return sign + (j ? intPart.substr(0, j) + "," : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + ",") + (2 ? "." + Math.abs(n - intPart).toFixed(2).slice(2) : '');
 };
+// -------
+Date.prototype.millis = function() { return (new Date()).getTime() }
+Date.prototype.uts = function() { return Math.floor(this.millis() / 1000) }	// unix timestamp; secs from epoch
 // -------
 String.prototype.trim = String.prototype.trim || function() {return this.replace(/^\s+|\s+$/g, "")}
 String.prototype.obj = function() { return j2o(this); }
