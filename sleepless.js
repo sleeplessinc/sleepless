@@ -37,10 +37,19 @@ global.nop = function(){}
 global.time = function() { return (new Date).uts() }
 global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
-global.p10 = function(v) { return parseInt(""+v, 10) || 0 }
-global.pflt = function(v) { return parseFloat(""+v) || 0.0 }
+global.toInt = global.p10 = function(v) { return parseInt(""+v, 10) || 0 }
+global.toFloat = global.pflt = function(v) { return parseFloat(""+v) || 0.0 }
 global.log = function(m) { return console.log(m); }
+global.money = function(n, decPoint, thousandsSep) {
+	var n = Math.round( pflt(n) * 100 ) / 100;
+    var sign = n < 0 ? '-' : '';
+    n = Math.abs(+n || 0);
+    var intPart = parseInt(n.toFixed(2), 10) + '';
+    var j = intPart.length > 3 ? intPart.length % 3 : 0;
+    return sign + (j ? intPart.substr(0, j) + "," : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + ",") + (2 ? "." + Math.abs(n - intPart).toFixed(2).slice(2) : '');
+}
 // -------
+/*
 Object.prototype.json = function() { return o2j(this); }
 Object.prototype.toInt = function() { return p10(this.toString()) }
 Object.prototype.toFloat = function() { return pflt(this.toString()) }
@@ -52,6 +61,7 @@ Object.prototype.toMoney = function(decPoint, thousandsSep) {
     var j = intPart.length > 3 ? intPart.length % 3 : 0;
     return sign + (j ? intPart.substr(0, j) + "," : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + ",") + (2 ? "." + Math.abs(n - intPart).toFixed(2).slice(2) : '');
 };
+*/
 // -------
 Date.prototype.millis = function() { return (new Date()).getTime() }
 Date.prototype.uts = function() { return Math.floor(this.millis() / 1000) }	// unix timestamp; secs from epoch
