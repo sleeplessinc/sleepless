@@ -40,16 +40,20 @@ global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return nu
 global.toInt = global.p10 = function(v) { return parseInt(""+v, 10) || 0 }
 global.toFloat = global.pflt = function(v) { return parseFloat(""+v) || 0.0 }
 global.log = function(m) { return console.log(m); }
-global.money = function(n, decPoint, thousandsSep) {
-	var n = Math.round( pflt(n) * 100 ) / 100;
+global.money = function(n, dec, sep) {
+    if(sep === undefined)
+        sep = ",";
+    if(dec === undefined)
+        dec = ".";
+    var n = Math.round( pflt(n) * 100 ) / 100;
     var sign = n < 0 ? '-' : '';
     n = Math.abs(+n || 0);
     var intPart = parseInt(n.toFixed(2), 10) + '';
     var j = intPart.length > 3 ? intPart.length % 3 : 0;
-    return sign + (j ? intPart.substr(0, j) + "," : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + ",") + (2 ? "." + Math.abs(n - intPart).toFixed(2).slice(2) : '');
+    return sign + (j ? intPart.substr(0, j) + sep : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + sep) + (2 ? dec + Math.abs(n - intPart).toFixed(2).slice(2) : '');
 }
 global.c2b = function(cents) {
-    return money(parseInt( ""+cents, 10 ) / 100);
+    return money(cents / 100, ".", "");
 }
 global.b2c = function(bucks) {
     return parseFloat( ((""+bucks).replace(/[^-.0-9]+/g, "")) ) * 100;
