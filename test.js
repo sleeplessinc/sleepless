@@ -32,6 +32,19 @@ throwIf( money(-31415.016) !== "-31,415.02" );
 throwIf( money(-31415.01) !== "-31,415.01" );
 throwIf( money(-31415.99) !== "-31,415.99" );
 
+throwIf( c2b("10") != 0.1 );
+throwIf( c2b("12345") != 123.45 );
+throwIf( c2b(12345) != 123.45 );
+throwIf( c2b(1) != 0.01 );
+throwIf( b2c("100") != 10000 );
+throwIf( b2c("1.23") != 123 );
+throwIf( b2c("1,234.56") != 123456 );
+throwIf( b2c("1,234.5") != 123450 );
+throwIf( b2c("1,234") != 123400 );
+throwIf( b2c("0.01") != 1 );
+throwIf( b2c("0.01") != 1 );
+
+
 getFile("test.js", function(err, data) {
 	throwIf( err, err );
 	throwIf( getFile("test.js").toString() !== data.toString() );

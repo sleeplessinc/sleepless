@@ -48,6 +48,14 @@ global.money = function(n, decPoint, thousandsSep) {
     var j = intPart.length > 3 ? intPart.length % 3 : 0;
     return sign + (j ? intPart.substr(0, j) + "," : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + ",") + (2 ? "." + Math.abs(n - intPart).toFixed(2).slice(2) : '');
 }
+global.c2b = function(cents) {
+    return money(parseInt( ""+cents, 10 ) / 100);
+}
+global.b2c = function(bucks) {
+    return parseFloat( ((""+bucks).replace(/[^-.0-9]+/g, "")) ) * 100;
+}
+
+
 // -------
 /*
 Object.prototype.json = function() { return o2j(this); }
