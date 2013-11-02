@@ -105,12 +105,12 @@ if(isNode) {
 	// node
 
 	// XXX make XHR version of this for browser?
-	global.getFile = function(path, cb) {
+	global.getFile = function(path, enc, cb) {
 		var fs = require("fs");
 		if(!cb) {
-			return fs.readFileSync(path);
+			return fs.readFileSync(path, enc);
 		}
-		fs.readFile(path, cb);
+		fs.readFile(path, enc, cb);
 	}
 }
 else  {
