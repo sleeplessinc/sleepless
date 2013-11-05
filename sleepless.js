@@ -25,6 +25,18 @@ if((typeof process) === 'undefined') {
 	isBrowser = true;
 	isNode = false;
 	global = window
+
+	ID = {};
+	var a = document.getElementsByTagName("*");
+	var e, id;
+	for(var i = 0; i < a.length; i++)
+	{
+		e = a[i];
+		id = e.id;
+		if(id)
+			ID[id] = e;
+	}
+
 }
 else  {
 	// node
