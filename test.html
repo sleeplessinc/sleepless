@@ -2,40 +2,8 @@
 <body>
 	<script src="sleepless.js"></script>
 	<script>
-		function l(s) {
-			document.write(s+"<br>")
-		}
-
-		o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
-		j = JSON.stringify(o);
-
-		throwIf( o.json() !== j );
-		throwIf( j.obj().json() !== j );
-
-		throwIf( "foO".lower() !== "foo" );
-		throwIf( "foO".upper() !== "FOO" );
-		throwIf( "foO".cap() !== "FoO" );
-		throwIf( "foO".ucfirst() !== "FoO" );
-		throwIf( "foo baR".ucwords() !== "Foo BaR" );
-		throwIf( "foo bar baz".abbr(7) !== "foo ..." );
-		throwIf( "foo".abbr(7) != "foo" );		// XXX why doesn't this work with !== ?
-		throwIf( " \tfoo bar \n".trim() !== "foo bar" );
-		throwIf( "3.1415".toInt() !== 3 );
-		throwIf( "3.1415".toFloat() !== 3.1415 );
-
-		throwIf( "0.01".toMoney() !== "0.01", "0.01".toMoney());
-		throwIf( "31415.015".toMoney() !== "31,415.02", "31415.015".toMoney());
-		throwIf( "31415.01".toMoney() !== "31,415.01" );
-		throwIf( "31415.99".toMoney() !== "31,415.99" );
-		throwIf( (0.01).toMoney() !== "0.01");
-		throwIf( (31415.015).toMoney() !== "31,415.02");
-		throwIf( (31415.01).toMoney() !== "31,415.01" );
-		throwIf( (31415.99).toMoney() !== "31,415.99" );
-		throwIf( (-0.01).toMoney() !== "-0.01", (-0.01).toMoney());
-		throwIf( (-31415.016).toMoney() !== "-31,415.02", (-31415.015).toMoney());
-		throwIf( (-31415.01).toMoney() !== "-31,415.01" );
-		throwIf( (-31415.99).toMoney() !== "-31,415.99" );
-
+		function require() {}
 	</script>
+	<script src="test.js"></script>
 </body>
 </html>
