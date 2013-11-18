@@ -51,7 +51,7 @@ throwIf( toMoney(-31415.016) !== "-31,415.02" );
 throwIf( toMoney(-31415.01) !== "-31,415.01" );
 throwIf( toMoney(-31415.99) !== "-31,415.99" );
 
-throwIf( time() !== dt2ts() );
+throwIf( dt2ts() !== 0 );
 throwIf( ts2us(1384565221) !== "11/15/2013 17:27:01" );
 throwIf( ts2us_md(1384565221) !== "11/15" );
 throwIf( ts2us_mdy(1384565221) !== "11/15/2013" );

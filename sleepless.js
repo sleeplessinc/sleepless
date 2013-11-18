@@ -105,7 +105,8 @@ global.ts2dt = function(ts) {
 
 // convert Date to unix timestamp
 global.dt2ts = function(dt) {
-	dt = dt || new Date();
+	if(! (dt instanceof Date) )
+		return 0;
 	return toInt(dt.getTime() / 1000);
 }
 
