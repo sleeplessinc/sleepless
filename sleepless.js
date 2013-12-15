@@ -31,8 +31,6 @@ else  {
 }
 
 
-
-
 // for convenience
 global.log = function(m) { return console.log(m); }
 
@@ -273,17 +271,6 @@ if(isNode) {
 else  {
 	// isBrowser
 
-	/*ID = {};
-	var a = document.getElementsByTagName("*");
-	var e, id;
-	for(var i = 0; i < a.length; i++)
-	{
-		e = a[i];
-		id = e.id;
-		if(id)
-			ID[id] = e;
-	}*/
-
 	// return element with id
 	I = function(id) { return document.getElementById(id); }
 
@@ -305,7 +292,7 @@ else  {
 	// reload page
 	reload = function() { document.location.reload(); }
 
-	// xxx 
+	// xxx XHR?
 	getFile = function(path, enc, cb) { }
 }
 
