@@ -205,6 +205,9 @@ global.ts2us_mdy = function(ts) {
 // convert unix timestamp to "MM/DD/YY"
 global.ts2us_mdy2 = function(ts) {
 	var a = ts2us_mdy(ts).split("/");
+	if(a.length != 3) {
+		return a;
+	}
 	a[2] = a[2].substr(2);
 	return a.join("/");
 }
