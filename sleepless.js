@@ -95,6 +95,30 @@ global.toMoney = function(n, decimal, separator) {
 // return "now" as unix timestamp
 global.time = function() { return toInt(new Date().getTime() / 1000); }
 
+
+// convert "YYYY-MM-YY HH:MM:SS" to unix timestamp
+global.my2ts = function(m) {
+	var year = 0;
+	var month = 0;
+	var day = 0;
+	var hour = 0;
+	var minute = 0;
+	var second = 0;
+	var a = m.split( /[^\d]+/ );
+	if(a.length >= 3) {
+		year = toInt(a[0]);
+		month = toInt(a[1]);
+		day = toInt(a[2]);
+		if(a.length >= 6) {
+			hour = toInt(a[3]);
+			minute = toInt(a[4]);
+			second = toInt(a[5]);
+		}
+	}
+	var d = new Date(year, month, day, hour, minute, second, 0);
+	return Math.floor(d.getTime() / 1000);
+}
+
 // convert unix timestamp to Date 
 global.ts2dt = function(ts) {
 	ts = toInt(ts);
