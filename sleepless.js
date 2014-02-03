@@ -298,10 +298,15 @@ else  {
 	I = function(id) { return document.getElementById(id); }
 
 	// return value of element with id (generally an input type element)
-	V = function(id) { return I(id).value.trim(); }
+	// if input is a checkbox, return true/false (checked/unchecked)
+	V = function(id) {
+		var e = I(id);
+		var v = e.checked;
+		return (v !== undefined) ? v : e.value.trim();
+	}
 
 	// return value of element with id as unix timestamp
-	V.ts = function(id) { return us2ts(V(id)); }
+	V.ts = function(id) { return us2ts(V.int(id)); }
 
 	// return value of element with id as integer
 	V.int = function(id) { return toInt(V(id)); }
