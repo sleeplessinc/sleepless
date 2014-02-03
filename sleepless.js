@@ -305,7 +305,7 @@ else  {
 	}
 
 	// return value of element with id as unix timestamp
-	V.ts = function(id) { return us2ts(V.int(id)); }
+	V.ts = function(id) { return us2ts(V(id)); }
 
 	// return value of element with id as integer
 	V.int = function(id) { return toInt(V(id)); }
