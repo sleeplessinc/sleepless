@@ -301,8 +301,7 @@ else  {
 	// if input is a checkbox, return true/false (checked/unchecked)
 	V = function(id) {
 		var e = I(id);
-		var v = e.checked;
-		return (v !== undefined) ? v : e.value.trim();
+		return (e.type === "checkbox") ? (e.checked ? 1 : 0) : e.value.trim();
 	}
 
 	// return value of element with id as unix timestamp
