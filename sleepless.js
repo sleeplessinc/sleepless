@@ -251,6 +251,10 @@ String.prototype.ucwords = function( sep ) {
 	return a.join( " " );
 }
 
+String.prototype.startsWith = function(prefix) {
+	return this.substr(0, prefix.length) == prefix;
+}
+
 // abbreviate to l chars with ellipses
 String.prototype.abbr = function(l) {
 	l = toInt(l) || 5;
