@@ -46,7 +46,8 @@ global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null }
 // return object as JSON or null if error  
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
-
+// convert an arguments object to real array
+global.args = function(a) { return Array.prototype.slice.call(a); } 
 
 
 // convert whatever to float
@@ -292,6 +293,12 @@ if(isNode) {
 			return fs.readFileSync(path, enc);
 		}
 		fs.readFile(path, enc, cb);
+	}
+
+	global.sha1 = function(s) {
+		var h = require("crypto").createHash("sha1");
+		h.update(s);
+		return h.digest("hex");
 	}
 
 }

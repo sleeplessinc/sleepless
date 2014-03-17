@@ -1,6 +1,6 @@
 {
 	"name": "sleepless",
-	"version": "1.2.4",
+	"version": "1.2.5",
 	"description": "Sleepless commonly used Javascript enhancement code",
 	"author": "Joe Hitchens, Sleepless Inc., (sleepless.com)",
     "dependencies": {
