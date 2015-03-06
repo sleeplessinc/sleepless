@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Sleepless Software Inc. All rights reserved.
+Copyright 2015 Sleepless Software Inc. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -62,14 +62,12 @@ global.toInt = function(v) {
 // convert from cents to bucks
 global.centsToBucks = function(cents) {
 	return toFlt( toInt(cents) / 100 );
-    //return money(cents / 100, ".", "");
 }
 global.c2b = global.centsToBucks;
 
 // convert bucks to cents
 global.bucksToCents = function(bucks) {
 	return toInt( toFlt(bucks) * 100 );
-    //return parseFloat( ((""+bucks).replace(/[^-.0-9]+/g, "")) ) * 100;
 }
 global.b2c = global.bucksToCents;
 
@@ -89,7 +87,6 @@ global.toMoney = function(n, decimal, separator) {
 		intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + separator) +
 		(2 ? decimal + Math.abs(n - intPart).toFixed(2).slice(2) : '');
 }
-
 
 
 
@@ -129,9 +126,9 @@ global.dt2ts = function(dt) {
 	return toInt(dt.getTime() / 1000);
 }
 
-// convert "MM/DD/YYYY HH:MM:SS" to Date object or null if "s" can't be parsed
-// if year is 2 digits, it will try guess what you meant
-// time part (HH:MM:SS) can be omitted and seconds is optional
+// Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if "s" can't be parsed
+// If year is 2 digits, it will try guess what you meant
+// Time part (HH:MM:SS) can be omitted and seconds is optional
 global.us2dt = function(us) {
 
 	if(!us) {
@@ -332,5 +329,6 @@ else  {
 
 	// xxx XHR?
 	getFile = function(path, enc, cb) { }
+
 }
 
