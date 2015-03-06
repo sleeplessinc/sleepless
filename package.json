@@ -1,6 +1,7 @@
 {
 	"name": "sleepless",
-	"version": "1.2.6",
+	"version": "2.0.0",
 	"description": "Sleepless commonly used Javascript enhancement code",
-	"author": "Joe Hitchens, Sleepless Inc., (sleepless.com)"
+	"author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
+	"repository": "git://github.com/sleeplessinc/sleepless.git"
 }
