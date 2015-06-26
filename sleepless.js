@@ -279,6 +279,31 @@ String.prototype.toId = function() {
 }
 
 
+global.agoStr = function(ts, no_suffix) {
+	if(ts == 0)
+		return "";
+
+    var t = time() - ts;
+	if(t < 1)
+		return "Just now";
+
+	var v = ""
+	var round = Math.round
+        
+    if(t>31536000) v = round(t/31536000,0)+' year'; 
+    else if(t>2419200) v = round(t/2419200,0)+' month'; 
+    else if(t>604800) v = round(t/604800,0)+' week'; 
+    else if(t>86400) v = round(t/86400,0)+' day'; 
+    else if(t>3600) v = round(t/3600,0)+' hour'; 
+    else if(t>60) v = round(t/60,0)+' minute'; 
+    else v = t+' second'; 
+        
+    if(toInt(v) > 1)
+		v += 's'; 
+
+    return v + (no_suffix ? "" : " ago");
+}
+
 
 
 if(isNode) {
@@ -327,7 +352,7 @@ else  {
 	// reload page
 	reload = function() { document.location.reload(); }
 
-	// xxx XHR?
+	// XXX XHR?
 	getFile = function(path, enc, cb) { }
 
 }
