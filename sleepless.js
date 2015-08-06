@@ -278,6 +278,18 @@ String.prototype.toId = function() {
 	return s;
 }
 
+// test a string to see if it contains all of the arguments
+// "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
+String.prototype.looksLike = function() {
+    var a = args(arguments);        // convert arguments to true array
+    var s = "_" + this.toLowerCase().toId() + "_"; //.split("_"); //toLowerCase();
+    for(var i = 0; i < a.length; i++) {
+        var t = "_" + (a[i].toLowerCase().toId()) + "_";
+        if(s.indexOf(t) == -1)
+            return false;
+    }
+    return true;
+}
 
 global.agoStr = function(ts, no_suffix) {
 	if(ts == 0)
