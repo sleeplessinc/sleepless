@@ -47,6 +47,7 @@ global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null }
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
 // convert an arguments object to real array
+// xxx DEPRECATE - suspect firefox doesn't like this
 global.args = function(a) { return Array.prototype.slice.call(a); } 
 
 
@@ -281,7 +282,7 @@ String.prototype.toId = function() {
 // test a string to see if it contains all of the arguments
 // "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
 String.prototype.looksLike = function() {
-    var a = args(arguments);        // convert arguments to true array
+    var a = Array.prototype.slice.call(arguments);        // convert arguments to true array
     var s = "_" + this.toLowerCase().toId() + "_"; //.split("_"); //toLowerCase();
     for(var i = 0; i < a.length; i++) {
         var t = "_" + (a[i].toLowerCase().toId()) + "_";
