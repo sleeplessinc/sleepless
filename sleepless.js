@@ -336,6 +336,15 @@ if(isNode) {
 		return h.digest("hex");
 	}
 
+	global.EE = function(ctr) {
+		var EventEmitter = require("events");
+		require("util").inherits(ctr, EventEmitter);
+		var o = new ctr();
+		EventEmitter.call(o);
+		return o;
+	};
+
+
 }
 else  {
 	// isBrowser
