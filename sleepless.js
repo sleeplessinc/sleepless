@@ -76,7 +76,8 @@ global.c2b = global.centsToBucks;
 
 // convert bucks to cents
 global.bucksToCents = function(bucks) {
-	return toInt( toFlt(bucks) * 100 );
+	//return toInt( toFlt(bucks) * 100 );
+	return Math.round( toFlt(bucks) * 100 );
 }
 global.b2c = global.bucksToCents;
 
