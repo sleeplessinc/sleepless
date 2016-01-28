@@ -32,7 +32,15 @@ else  {
 
 
 // for convenience
-global.log = function(m) { return console.log(m); }
+global.log = function(m) {
+	if(isBrowser && window["console"] === undefined) {
+		return;		// console doesn't exist in IE unless in debug mode
+	}
+	if(typeof m === "object") {
+		m = o2j(m);
+	}
+	return console.log(m);
+}
 
 // throw an error if a condition is true
 global.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
