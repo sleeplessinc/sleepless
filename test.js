@@ -87,6 +87,7 @@ getFile("test.js", "utf8", function(err, data) {
 });
 
 throwIf( sha1("I have a lovely bunch of coconuts.") !== "9fd0f467384256f02560d0694316b6d9bdfe7c68");
+throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d8871d53111e021483c12a3e1ccb8ec59b0d62f3167cb13");
 
 throwIf( "I,\nhave a lovely bunch of coconuts.".looksLike("i have", "coconuts") !== true)
 

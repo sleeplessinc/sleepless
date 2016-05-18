@@ -345,6 +345,12 @@ if(isNode) {
 		return h.digest("hex");
 	}
 
+	global.sha256 = function(s) {
+		var h = require("crypto").createHash("sha256");
+		h.update(s);
+		return h.digest("hex");
+	}
+
 	global.EE = function(ctr) {
 		var EventEmitter = require("events");
 		require("util").inherits(ctr, EventEmitter);
