@@ -235,6 +235,19 @@ global.ts2us_mdy2hm = function(ts) {
 	return ts2us_mdy2(ts) + " " + ts2us_hm(ts);
 }
 
+global.ts2us_dMy = function(ts) {
+	var d = ts2dt(ts);
+	if(!d) {
+		return "";
+	}
+	var month_names = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ");
+	return ""+
+		("0"+d.getDate()).substr(-2)+
+		"-"+
+		month_names[d.getMonth()]+
+		"-"+
+		d.getFullYear();
+}
 
 
 
