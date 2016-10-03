@@ -405,5 +405,17 @@ else  {
 	// XXX XHR?
 	getFile = function(path, enc, cb) { }
 
+	getQueryData = function() {
+		var o = {}
+		var s = document.location.search
+		if(s) {
+			var kv = s.substr(1).split("&")
+			for(var i = 0; i < kv.length; i++) {
+				var aa = kv[i].split("=")
+				o[aa[0]] = decodeURIComponent(aa[1])
+			}
+		}
+		return o
+	}
 }
 
