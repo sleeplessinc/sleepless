@@ -1,5 +1,5 @@
 /*
-Copyright 2015 Sleepless Software Inc. All rights reserved.
+Copyright 2016 Sleepless Software Inc. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -76,11 +76,11 @@ global.c2b = global.centsToBucks;
 
 // convert bucks to cents
 global.bucksToCents = function(bucks) {
-	//return toInt( toFlt(bucks) * 100 );
 	return Math.round( toFlt(bucks) * 100 );
 }
 global.b2c = global.bucksToCents;
 
+// format a number into a string with any # of decimal places, and alternative decimal and thousand-separation chars
 global.numFmt = function(n, plcs, dot, sep) {
     sep = sep || ",";			// thousands separator char
     dot = dot || ".";			// decimal point char
@@ -262,6 +262,7 @@ global.ts2us_mdy2hm = function(ts) {
 	return ts2us_mdy2(ts) + " " + ts2us_hm(ts);
 }
 
+// convert unix timestamp to something like "01-Jan-2016"
 global.ts2us_dMy = function(ts) {
 	var d = ts2dt(ts);
 	if(!d) {
@@ -299,6 +300,7 @@ String.prototype.ucwords = function( sep ) {
 	return a.join( " " );
 }
 
+// returns true if the string begines with the prefix string
 String.prototype.startsWith = function(prefix) {
 	return this.substr(0, prefix.length) == prefix;
 }
@@ -341,6 +343,8 @@ String.prototype.looksLike = function() {
     return true;
 }
 
+// returns something like "3 minutes ago"
+// pass truthy value for no_suffix to suppress the " ago" at the end
 global.agoStr = function(ts, no_suffix) {
 	if(ts == 0)
 		return "";
@@ -365,7 +369,6 @@ global.agoStr = function(ts, no_suffix) {
 
     return v + (no_suffix ? "" : " ago");
 }
-
 
 
 if(isNode) {
@@ -404,25 +407,6 @@ if(isNode) {
 else  {
 	// isBrowser
 
-	// return element with id
-	I = function(id) { return document.getElementById(id); }
-
-	// return value of element with id (generally an input type element)
-	// if input is a checkbox, return true/false (checked/unchecked)
-	V = function(id) {
-		var e = I(id);
-		return (e.type === "checkbox") ? (e.checked ? 1 : 0) : e.value.trim();
-	}
-
-	// return value of element with id as unix timestamp
-	V.ts = function(id) { return us2ts(V(id)); }
-
-	// return value of element with id as integer
-	V.int = function(id) { return toInt(V(id)); }
-
-	// return value of element with id as float
-	V.flt = function(id) { return toFlt(V(id)); }
-
 	// navigate to new url
 	jmp = function(url) { document.location = url; }
 
@@ -444,5 +428,27 @@ else  {
 		}
 		return o
 	}
+
+/* --------- deprecate these -------------- */
+	// return element with id
+	I = function(id) { return document.getElementById(id); }
+
+	// return value of element with id (generally an input type element)
+	// if input is a checkbox, return true/false (checked/unchecked)
+	V = function(id) {
+		var e = I(id);
+		return (e.type === "checkbox") ? (e.checked ? 1 : 0) : e.value.trim();
+	}
+
+	// return value of element with id as unix timestamp
+	V.ts = function(id) { return us2ts(V(id)); }
+
+	// return value of element with id as integer
+	V.int = function(id) { return toInt(V(id)); }
+
+	// return value of element with id as float
+	V.flt = function(id) { return toFlt(V(id)); }
+/* --------- deprecate these -------------- */
+
 }
 
