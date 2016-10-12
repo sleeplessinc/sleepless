@@ -67,6 +67,7 @@ throwIf( toMoney(-0.01) !== "-0.01" );
 throwIf( toMoney(-31415.016) !== "-31,415.02" );
 throwIf( toMoney(-31415.01) !== "-31,415.01" );
 throwIf( toMoney(-31415.99) !== "-31,415.99" );
+throwIf( toMoney("1,000.00") !== "1,000.00" );
 
 throwIf( toPct(1) !== "100", toPct(1) );
 throwIf( toPct(1.013, 0) !== "101" );
