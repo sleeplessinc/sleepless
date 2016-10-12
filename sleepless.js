@@ -81,28 +81,34 @@ global.bucksToCents = function(bucks) {
 }
 global.b2c = global.bucksToCents;
 
-// convert whatever to a string that looks like "1,234.56"
-global.toMoney = function(n, decimal, separator) {
-    if(separator === undefined)
-        separator = ",";
-    if(decimal === undefined)
-        decimal = ".";
-    var n = Math.round( toFlt(n) * 100 ) / 100;
+global.numFmt = function(n, plcs, dot, sep) {
+    sep = sep || ",";			// thousands separator char
+    dot = dot || ".";			// decimal point char
+	plcs = toInt(plcs);
+	var p = Math.pow(10, plcs);
+    var n = Math.round( n * p ) / p;
     var sign = n < 0 ? '-' : '';
     n = Math.abs(+n || 0);
-    var intPart = parseInt(n.toFixed(2), 10) + '';
+    var intPart = parseInt(n.toFixed(plcs), 10) + '';
     var j = intPart.length > 3 ? intPart.length % 3 : 0;
     return sign +
-		(j ? intPart.substr(0, j) + separator : '') +
-		intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + separator) +
-		(2 ? decimal + Math.abs(n - intPart).toFixed(2).slice(2) : '');
+		(j ? intPart.substr(0, j) + sep : '') +
+		intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + sep) +
+		(plcs ? dot + Math.abs(n - intPart).toFixed(plcs).slice(-plcs) : '');
 }
 
+// convert something like 1.234 to a string that looks like "123.4%" with optional decimal places
+global.toPct = function(n, plcs, dot, sep) {
+	return numFmt(n * 100, plcs, dot, sep);
+}
 
+// convert whatever to a string that looks like "1,234.56"
+global.toMoney = function(n, dot, sep) {
+	return numFmt(n, 2, dot, sep);
+}
 
 // return "now" as unix timestamp
 global.time = function() { return toInt(new Date().getTime() / 1000); }
-
 
 // convert "YYYY-MM-YY HH:MM:SS" to unix timestamp
 global.my2ts = function(m) {
@@ -121,6 +127,27 @@ global.my2ts = function(m) {
 	var second = toInt(a[5]);
 	var d = new Date(year, month - 1, day, hour, minute, second, 0);
 	return toInt(d.getTime() / 1000);
+}
+
+// convert unix timestamp to "YYYY-MM-DD HH:MM:SS"
+global.ts2my = function(ts) {
+	var d = ts2dt(ts);
+	if(!d) {
+		return "";
+	}
+	return ""+
+		d.getFullYear()+
+		"-"+
+		("0"+(d.getMonth() + 1)).substr(-2)+
+		"-"+
+		("0"+d.getDate()).substr(-2)+
+		" "+ 
+		("0"+d.getHours()).substr(-2)+
+		":"+
+		("0"+d.getMinutes()).substr(-2)+
+		":"+
+		("0"+d.getSeconds()).substr(-2)+
+		"";
 }
 
 // convert unix timestamp to Date 

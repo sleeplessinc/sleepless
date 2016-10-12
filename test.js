@@ -38,7 +38,24 @@ throwIf( b2c("1,234") !== 123400 );
 throwIf( b2c("0.01") !== 1 );
 throwIf( b2c("0.01") !== 1 );
 
-throwIf( toMoney("0.01") !== "0.01", "0.01" );
+throwIf( numFmt(0) !== "0" );
+throwIf( numFmt(0, 1) !== "0.0" );
+throwIf( numFmt(0, 4) !== "0.0000" );
+throwIf( numFmt(1, 4) !== "1.0000" );
+throwIf( numFmt(1.1, 3) !== "1.100" );
+throwIf( numFmt(-1.1, 3) !== "-1.100" );
+throwIf( numFmt(-1.104, 2) !== "-1.10" );
+throwIf( numFmt(1.105, 2) !== "1.11" );
+throwIf( numFmt(-1.105, 2) !== "-1.10" );
+throwIf( numFmt(1234) !== "1,234" );
+throwIf( numFmt(123456) !== "123,456" );
+throwIf( numFmt(1234567) !== "1,234,567" );
+throwIf( numFmt(1234, 1) !== "1,234.0" );
+throwIf( numFmt(1234, 3) !== "1,234.000" );
+throwIf( numFmt(-0.0001, 4, ":") !== "-0:0001" );
+throwIf( numFmt(1234, 3, ":", "!") !== "1!234:000" );
+
+throwIf( toMoney("0.01") !== "0.01" );
 throwIf( toMoney("31415.015") !== "31,415.02" );
 throwIf( toMoney("31415.01") !== "31,415.01" );
 throwIf( toMoney("31415.99") !== "31,415.99" );
@@ -51,8 +68,16 @@ throwIf( toMoney(-31415.016) !== "-31,415.02" );
 throwIf( toMoney(-31415.01) !== "-31,415.01" );
 throwIf( toMoney(-31415.99) !== "-31,415.99" );
 
+throwIf( toPct(1) !== "100", toPct(1) );
+throwIf( toPct(1.013, 0) !== "101" );
+throwIf( toPct(1.016, 0) !== "102" );
+throwIf( toPct(0.01, 0) !== "1" );
+throwIf( toPct(2.3, 3) !== "230.000" );
+throwIf( toPct(-314.15, 2) !== "-31,415.00" );
+
 throwIf( my2ts("") !== 0 );
 throwIf( my2ts("2014-01-02 12:13:14") !== 1388693594 );
+throwIf( my2ts(ts2my(1388693594)) !== 1388693594 );
 
 throwIf( dt2ts() !== 0 );
 throwIf( ts2us(1384565221) !== "11/15/2013 17:27:01" );
