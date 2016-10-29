@@ -301,9 +301,14 @@ String.prototype.ucwords = function( sep ) {
 	return a.join( " " );
 }
 
-// returns true if the string begines with the prefix string
+// returns true if the string begins with the prefix string
 String.prototype.startsWith = function(prefix) {
 	return this.substr(0, prefix.length) == prefix;
+}
+
+// returns true if the string ends with the suffix string
+String.prototype.endsWith = function(suffix) {
+	return this.substr(-prefix.length) == prefix;
 }
 
 // abbreviate to l chars with ellipses
