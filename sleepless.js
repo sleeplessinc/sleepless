@@ -308,7 +308,7 @@ String.prototype.startsWith = function(prefix) {
 
 // returns true if the string ends with the suffix string
 String.prototype.endsWith = function(suffix) {
-	return this.substr(-prefix.length) == prefix;
+	return this.substr(-suffix.length) == suffix;
 }
 
 // abbreviate to l chars with ellipses
