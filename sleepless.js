@@ -336,7 +336,7 @@ String.prototype.toId = function() {
 	return s;
 }
 
-// test a string to see if it contains all of the arguments
+// returns true if string contains all of the arguments
 // "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
 String.prototype.looksLike = function() {
     var a = Array.prototype.slice.call(arguments);        // convert arguments to true array
@@ -348,6 +348,12 @@ String.prototype.looksLike = function() {
     }
     return true;
 }
+
+// returns true if the string is a valid email address
+String.prototype.is_email(email) {
+    return /^[A-Za-z0-9_\+-]+(\.[A-Za-z0-9_\+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.([A-Za-z]{2,4})$/.test(email);
+}
+
 
 // returns something like "3 minutes ago"
 // pass truthy value for no_suffix to suppress the " ago" at the end
