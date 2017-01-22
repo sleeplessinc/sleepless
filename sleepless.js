@@ -350,7 +350,7 @@ String.prototype.looksLike = function() {
 }
 
 // returns true if the string is a valid email address
-String.prototype.is_email(email) {
+String.prototype.is_email = function(email) {
     return /^[A-Za-z0-9_\+-]+(\.[A-Za-z0-9_\+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.([A-Za-z]{2,4})$/.test(email);
 }
 
