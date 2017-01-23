@@ -118,6 +118,10 @@ throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d887
 
 throwIf( "I,\nhave a lovely bunch of coconuts.".looksLike("i have", "coconuts") !== true)
 
+throwIf( "joe@sleepless.com".is_email() !== true );
+throwIf( "a@b.cd".is_email() !== true );
+throwIf( "aaaaaaaaaaaaaaaaaaaa-_12.aaaa@bbbbbb.cccccccc.dddddddddddddddd".is_email() !== true );
+throwIf( "joe.sleepless.com".is_email() !== false );
 
 Thing = function() {
 	this.name = "Mr. Thing";
