@@ -420,15 +420,17 @@ else  {
 	// isBrowser
 
 	// navigate to new url
-	jmp = function(url) { document.location = url; }
+	global.jmp = function(url) { document.location = url; }
 
 	// reload page
-	reload = function() { document.location.reload(); }
+	global.reload = function() { document.location.reload(); }
 
 	// XXX XHR?
-	getFile = function(path, enc, cb) { }
+	global.getFile = function(path, enc, cb) {
+		throw(new Error("Unimplemented"));
+	}
 
-	getQueryData = function() {
+	global.getQueryData = function() {
 		var o = {}
 		var s = document.location.search
 		if(s) {
@@ -439,6 +441,40 @@ else  {
 			}
 		}
 		return o
+	}
+
+	global.getEl = function(id) {
+		return document.getElementById(id);
+	};
+
+	HTMLElement.prototype.attr = function(a, v) {
+		if(v !== undefined) {
+			this.setAttribute(a, v);
+			return this;
+		}
+		else {
+			return this.getAttribute(a);
+		}
+	}
+
+	HTMLElement.prototype.val = function(v) {
+		if(v !== undefined) {
+			this.value = v;
+			return this;
+		}
+		else {
+			return (this.value || "").trim();
+		}
+	}
+
+	HTMLElement.prototype.html = function(h) {
+		if(h !== undefined) {
+			this.innerHTML = h;
+			return this;
+		}
+		else {
+			return this.innerHTML;
+		}
 	}
 
 /* --------- deprecate these -------------- */

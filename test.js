@@ -133,3 +133,7 @@ t.on("foo", function(n) {
 })
 t.emit("foo", t.name);
 
+if(isBrowser) {
+}
+
+
