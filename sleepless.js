@@ -108,6 +108,25 @@ global.toMoney = function(n, dot, sep) {
 	return numFmt(n, 2, dot, sep);
 }
 
+// return a human readable string that describes 'n' as a number of bytes; "1 KB", "21.5 MB", etc.
+global.byteSize = function(sz) {
+	if(typeof sz != "number")
+		return sz;
+	if(sz < 1024)
+		return numFmt(sz, 0) + " B"
+	sz = sz / 1024
+	if(sz < 1024)
+		return numFmt(sz, 1) + " KB"
+	sz = sz / 1024
+	if(sz < 1024)
+		return numFmt(sz, 1) + " MB"
+	sz = sz / 1024
+	if(sz < 1024)
+		return numFmt(sz, 1) + " GB"
+	sz = sz / 1024
+	return numFmt(sz, 1) + " TB"
+}
+
 // return "now" as unix timestamp
 global.time = function() { return toInt(new Date().getTime() / 1000); }
 

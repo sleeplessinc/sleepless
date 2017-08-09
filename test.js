@@ -55,6 +55,12 @@ throwIf( numFmt(1234, 3) !== "1,234.000" );
 throwIf( numFmt(-0.0001, 4, ":") !== "-0:0001" );
 throwIf( numFmt(1234, 3, ":", "!") !== "1!234:000" );
 
+throwIf( byteSize(123) !== "123 B" );
+throwIf( byteSize(1234) !== "1.2 KB" );
+throwIf( byteSize(1234567) !== "1.2 MB" );
+throwIf( byteSize(1234567890) !== "1.1 GB" );
+throwIf( byteSize(1234567890123) !== "1.1 TB" );
+
 throwIf( toMoney("0.01") !== "0.01" );
 throwIf( toMoney("31415.015") !== "31,415.02" );
 throwIf( toMoney("31415.01") !== "31,415.01" );
