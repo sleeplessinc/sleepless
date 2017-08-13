@@ -83,8 +83,8 @@ global.b2c = global.bucksToCents;
 // format a number into a string with any # of decimal places, and alternative decimal and thousand-separation chars
 global.numFmt = function(n, plcs, dot, sep) {
 	n = toFlt(n);
-    sep = sep || ",";			// thousands separator char
-    dot = dot || ".";			// decimal point char
+    sep = typeof sep === "string" ? sep : ",";			// thousands separator char
+    dot = typeof dot === "string" ? dot : ".";			// decimal point char
 	plcs = toInt(plcs);
 	var p = Math.pow(10, plcs);
     var n = Math.round( n * p ) / p;

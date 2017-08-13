@@ -52,6 +52,7 @@ throwIf( numFmt(123456) !== "123,456" );
 throwIf( numFmt(1234567) !== "1,234,567" );
 throwIf( numFmt(1234, 1) !== "1,234.0" );
 throwIf( numFmt(1234, 3) !== "1,234.000" );
+throwIf( numFmt(1234, 3, ".", "") !== "1234.000" );
 throwIf( numFmt(-0.0001, 4, ":") !== "-0:0001" );
 throwIf( numFmt(1234, 3, ":", "!") !== "1!234:000" );
 
