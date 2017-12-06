@@ -444,9 +444,12 @@ else  {
 	// reload page
 	global.reload = function() { document.location.reload(); }
 
-	// XXX XHR?
-	global.getFile = function(path, enc, cb) {
-		throw(new Error("Unimplemented"));
+	// make an async HTTP GET request for a URL
+	global.getFile = function(url, cb) {
+		var x = new XMLHttpRequest();
+		x.onload = function() { cb(x.responseText, x); };
+		x.open("GET", url);
+		x.send();
 	}
 
 	global.getQueryData = function() {
