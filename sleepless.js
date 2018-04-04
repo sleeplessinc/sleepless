@@ -186,7 +186,8 @@ global.dt2ts = function(dt) {
 // Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if "s" can't be parsed
 // If year is 2 digits, it will try guess what you meant
 // Time part (HH:MM:SS) can be omitted and seconds is optional
-global.us2dt = function(us) {
+// if utc argument is truthy, then return a UTC version of the date
+global.us2dt = function(us, utc) {
 
 	if(!us) {
 		return null;
@@ -216,6 +217,10 @@ global.us2dt = function(us) {
 	var min = toInt(m[4]);
 	var sec = toInt(m[5]);
 	var ms = toInt(m[6]);
+
+	if(utc) {
+		return new Date(Date.UTC(year, mon, date, hour, min, sec, ms));
+	}
 
 	return new Date(year, mon, date, hour, min, sec, ms);
 }
