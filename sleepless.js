@@ -186,7 +186,7 @@ global.dt2ts = function(dt) {
 // Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if "s" can't be parsed
 // If year is 2 digits, it will try guess what you meant
 // Time part (HH:MM:SS) can be omitted and seconds is optional
-// if utc argument is truthy, then return a UTC version of the date
+// if utc argument is truthy, then return a UTC version
 global.us2dt = function(us, utc) {
 
 	if(!us) {
@@ -227,8 +227,9 @@ global.us2dt = function(us, utc) {
 
 
 // convert "MM/DD/YYYY HH:MM:SS" to unix timestamp
-global.us2ts = function(us) {
-	return dt2ts(us2dt(us));
+// if utc argument is truthy, then return a UTC version
+global.us2ts = function(us, utc) {
+	return dt2ts(us2dt(us, utc));
 }
 
 // convert unix timestamp to "MM/DD/YYYY HH:MM:SS"
