@@ -76,7 +76,8 @@ global.c2b = global.centsToBucks;
 
 // convert bucks to cents
 global.bucksToCents = function(bucks) {
-	return Math.round( toFlt(bucks) * 100 );
+	// return Math.round( toFlt(bucks) * 100 ); --> can't use this; It breaks on #'s like 0.285 - )-:
+	return Math.round( (toFlt(bucks) * 1000) / 10 );
 }
 global.b2c = global.bucksToCents;
 
