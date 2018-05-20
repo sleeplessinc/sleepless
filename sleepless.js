@@ -58,6 +58,30 @@ global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return nu
 // xxx DEPRECATE - suspect firefox doesn't like this
 global.args = function(a) { return Array.prototype.slice.call(a); } 
 
+// return an array containing the keys in an object
+// if cb is provide, then do a forEach() on the array with cb as the callback.
+Object.prototype.keys = function(cb) {
+    let a = Object.keys(this);
+    if(cb) {
+        a.forEach(cb);
+    }
+    return a;
+}
+
+// return an array containing the values in an object
+// if cb is provide, then do a forEach() on the array with cb as the callback.
+Object.prototype.vals = function(cb) {
+    let o = this;
+    let v = [];
+    let a = Object.keys(o);
+    a.forEach((k)=>{
+        v.push(o[k]);
+    });
+    if(cb) {
+        v.forEach(cb);
+    }
+    return v;
+}
 
 // convert whatever to float
 global.toFlt = function(v) { return parseFloat((""+v).replace(/[^-.0-9]/g, "")) || 0.0; }
