@@ -29,6 +29,8 @@ else  {
 	isNode = true;
 	isBrowser = false;
 }
+global.isNode = isNode;
+global.isBrowser = isBrowser;
 
 
 // for convenience
