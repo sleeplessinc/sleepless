@@ -60,6 +60,10 @@ global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return nu
 // xxx DEPRECATE - suspect firefox doesn't like this
 global.args = function(a) { return Array.prototype.slice.call(a); } 
 
+
+// iterate through an object's attributes
+global.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };
+
 /*
 // return an array containing the keys in an object
 // if cb is provide, then do a forEach() on the array with cb as the callback.
