@@ -477,6 +477,21 @@ if(isNode) {
 else  {
 	// isBrowser
 
+	global.LS = {
+		get: function(k) {
+			try {
+				return localStorage.getItem(k);
+			} catch(e) { }
+			return null;
+		},
+		set: function(k, v) {
+			try {
+				return localStorage.setItem(k, v);
+			} catch(e) { }
+			return null;
+		},
+	};
+
 	// navigate to new url
 	global.jmp = function(url) { document.location = url; }
 
