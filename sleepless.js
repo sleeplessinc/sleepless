@@ -504,7 +504,36 @@ else  {
 		x.onload = function() { cb(x.responseText, x); };
 		x.open("GET", url);
 		x.send();
-	}
+	};
+
+	// shows a browser notification if permission granted.
+	// ask permission if user hasn't yet been asked and honor their choice thereafter.
+	// title = Title string to show in notice (name of app typically)
+	// text = String message to display.
+	// icon = String path to graphic 
+	// onclick = function to call if notification is clicked
+	global.showNotification = function(title, text, icon, onclick) {
+		if("Notification" in window) {
+			let do_notice = function() {
+				let n = new Notification(title, {body: text, icon:icon});
+				if(onclick) {
+					n.addEventListener("click", onclick);
+				}
+			};
+			if(Notification.permission === "granted") {
+				do_notice();
+			}
+			else {
+				if(Notification.permission !== "denied") {
+					Notification.requestPermission(function(permission) {
+						if(Notification.permission === "granted") {
+							do_notice();
+						}
+					});
+				}
+			}
+		}
+	};
 
 	global.getQueryData = function() {
 		var o = {}
