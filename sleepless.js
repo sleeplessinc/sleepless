@@ -65,6 +65,10 @@ global.args = function(a) { return Array.prototype.slice.call(a); }
 global.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };
 
 /*
+
+I think there's a reason these are commented out.
+Adding things to the Object prototype caused issues somewhere else.
+
 // return an array containing the keys in an object
 // if cb is provide, then do a forEach() on the array with cb as the callback.
 Object.prototype.keys = function(cb) {
@@ -89,6 +93,19 @@ Object.prototype.vals = function(cb) {
     }
     return v;
 }
+
+
+// This allows:
+//	{ foo:7, bar:3 }.each( (k, v) => { console.log(k+","+v); } );
+//		foo,7
+//		bar,3
+Object.prototype.each = function( cb ) {
+	Object.keys(this).forEach( k => {
+		cb( k, this[k] );
+	});
+	return this;
+}
+
 */
 
 // convert whatever to float
