@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Sleepless Software Inc. All rights reserved.
+Copyright 2019 Sleepless Software Inc. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -23,7 +23,7 @@ IN THE SOFTWARE.
 if((typeof process) === 'undefined') {
 	isBrowser = true;
 	isNode = false;
-	global = window;	// so i can define global functions outside this module
+	global = window;
 }
 else  {
 	isNode = true;
@@ -31,7 +31,6 @@ else  {
 }
 global.isNode = isNode;
 global.isBrowser = isBrowser;
-
 
 // for convenience
 global.log = function(m) {
@@ -57,56 +56,11 @@ global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null }
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
 // convert an arguments object to real array
-// xxx DEPRECATE - suspect firefox doesn't like this
+// XXX DEPRECATE - suspect Firefox doesn't like this
 global.args = function(a) { return Array.prototype.slice.call(a); } 
 
-
 // iterate through an object's attributes
-global.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };
-
-/*
-
-I think there's a reason these are commented out.
-Adding things to the Object prototype caused issues somewhere else.
-
-// return an array containing the keys in an object
-// if cb is provide, then do a forEach() on the array with cb as the callback.
-Object.prototype.keys = function(cb) {
-    let a = Object.keys(this);
-    if(cb) {
-        a.forEach(cb);
-    }
-    return a;
-}
-
-// return an array containing the values in an object
-// if cb is provide, then do a forEach() on the array with cb as the callback.
-Object.prototype.vals = function(cb) {
-    let o = this;
-    let v = [];
-    let a = Object.keys(o);
-    a.forEach((k)=>{
-        v.push(o[k]);
-    });
-    if(cb) {
-        v.forEach(cb);
-    }
-    return v;
-}
-
-
-// This allows:
-//	{ foo:7, bar:3 }.each( (k, v) => { console.log(k+","+v); } );
-//		foo,7
-//		bar,3
-Object.prototype.each = function( cb ) {
-	Object.keys(this).forEach( k => {
-		cb( k, this[k] );
-	});
-	return this;
-}
-
-*/
+global.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };	// XXX Use Object.keys() or deprecate
 
 // convert whatever to float
 global.toFlt = function(v) { return parseFloat((""+v).replace(/[^-.0-9]/g, "")) || 0.0; }
@@ -130,7 +84,7 @@ global.bucksToCents = function(bucks) {
 }
 global.b2c = global.bucksToCents;
 
-// format a number into a string with any # of decimal places, and alternative decimal and thousand-separation chars
+// format a number into a string with any # of decimal places, & alternative decimal & thousand-separation chars
 global.numFmt = function(n, plcs, dot, sep) {
 	n = toFlt(n);
     sep = typeof sep === "string" ? sep : ",";			// thousands separator char
@@ -177,10 +131,10 @@ global.byteSize = function(sz) {
 	return numFmt(sz, 1) + " TB"
 }
 
-// return "now" as unix timestamp
+// return "now" as Unix timestamp
 global.time = function() { return toInt(new Date().getTime() / 1000); }
 
-// convert "YYYY-MM-YY HH:MM:SS" to unix timestamp
+// convert "YYYY-MM-YY HH:MM:SS" to Unix timestamp
 global.my2ts = function(m) {
 	if(m === "0000-00-00 00:00:00") {
 		return 0;
@@ -199,7 +153,7 @@ global.my2ts = function(m) {
 	return toInt(d.getTime() / 1000);
 }
 
-// convert unix timestamp to "YYYY-MM-DD HH:MM:SS"
+// convert Unix timestamp to "YYYY-MM-DD HH:MM:SS"
 global.ts2my = function(ts) {
 	var d = ts2dt(ts);
 	if(!d) {
@@ -220,18 +174,18 @@ global.ts2my = function(ts) {
 		"";
 }
 
-// convert unix timestamp to Date 
+// convert Unix timestamp to Date 
 global.ts2dt = function(ts) {
 	ts = toInt(ts);
 	return ts ? new Date(ts * 1000) : null;
-}
+};
 
-// convert Date to unix timestamp
+// convert Date to Unix timestamp
 global.dt2ts = function(dt) {
 	if(! (dt instanceof Date) )
 		return 0;
 	return toInt(dt.getTime() / 1000);
-}
+};
 
 // Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if "s" can't be parsed
 // If year is 2 digits, it will try guess what you meant
@@ -273,16 +227,16 @@ global.us2dt = function(us, utc) {
 	}
 
 	return new Date(year, mon, date, hour, min, sec, ms);
-}
+};
 
 
-// convert "MM/DD/YYYY HH:MM:SS" to unix timestamp
-// if utc argument is truthy, then return a UTC version
+// Convert "MM/DD/YYYY HH:MM:SS" to Unix timestamp.
+// If utc argument is truthy, then return a UTC version.
 global.us2ts = function(us, utc) {
 	return dt2ts(us2dt(us, utc));
-}
+};
 
-// convert unix timestamp to "MM/DD/YYYY HH:MM:SS"
+// Convert Unix timestamp to "MM/DD/YYYY HH:MM:SS".
 global.ts2us = function(ts) {
 	var d = ts2dt(ts);
 	if(!d) {
@@ -303,17 +257,17 @@ global.ts2us = function(ts) {
 		"";
 }
 
-// convert unix timestamp to "MM/DD"
+// Convert Unix timestamp to "MM/DD".
 global.ts2us_md = function(ts) {
 	return ts2us(ts).substr(0, 5);
 }
 
-// convert unix timestamp to "MM/DD/YYYY"
+// Convert Unix timestamp to "MM/DD/YYYY".
 global.ts2us_mdy = function(ts) {
 	return ts2us(ts).substr(0, 10);
 }
 
-// convert unix timestamp to "MM/DD/YY"
+// Convert Unix timestamp to "MM/DD/YY"
 global.ts2us_mdy2 = function(ts) {
 	var a = ts2us_mdy(ts).split("/");
 	if(a.length != 3) {
@@ -323,22 +277,22 @@ global.ts2us_mdy2 = function(ts) {
 	return a.join("/");
 }
 
-// convert unix timestamp to "HH:MM"
+// Convert Unix timestamp to "HH:MM"
 global.ts2us_hm = function(ts) {
 	return ts2us(ts).substr(11, 5);
 }
 
-// convert unix timestamp to "MM/DD/YYYY HH:MM"
+// Convert Unix timestamp to "MM/DD/YYYY HH:MM"
 global.ts2us_mdyhm = function(ts) {
 	return ts2us_mdy(ts) + " " + ts2us_hm(ts);
 }
 
-// convert unix timestamp to "MM/DD/YY HH:MM"
+// Convert Unix timestamp to "MM/DD/YY HH:MM"
 global.ts2us_mdy2hm = function(ts) {
 	return ts2us_mdy2(ts) + " " + ts2us_hm(ts);
 }
 
-// convert unix timestamp to something like "01-Jan-2016"
+// Convert Unix timestamp to something like "01-Jan-2016"
 global.ts2us_dMy = function(ts) {
 	var d = ts2dt(ts);
 	if(!d) {
@@ -355,18 +309,18 @@ global.ts2us_dMy = function(ts) {
 
 
 
-// make all lowercase
+// Make all lowercase
 String.prototype.lcase = function() { return this.toLowerCase() }
 
-// make all uppercase
+// Make all uppercase
 String.prototype.ucase = function() { return this.toUpperCase() }
 
-// capitalize first word
+// Capitalize first word
 String.prototype.ucfirst = function() {
 	return this.substring(0,1).toUpperCase() + this.substring(1)
 }
 
-// capitalize all words
+// Capitalize all words
 String.prototype.ucwords = function( sep ) {
 	sep = sep || /[\s]+/;
 	var a = this.split( sep );
@@ -376,17 +330,17 @@ String.prototype.ucwords = function( sep ) {
 	return a.join( " " );
 }
 
-// returns true if the string begins with the prefix string
+// Returns true if the string begins with the prefix string
 String.prototype.startsWith = function(prefix) {
 	return this.substr(0, prefix.length) == prefix;
 }
 
-// returns true if the string ends with the suffix string
+// Returns true if the string ends with the suffix string
 String.prototype.endsWith = function(suffix) {
 	return this.substr(-suffix.length) == suffix;
 }
 
-// abbreviate to l chars with ellipses
+// Abbreviate to l chars with ellipses
 String.prototype.abbr = function(l) {
 	l = toInt(l) || 5;
 	if(this.length <= l) {
@@ -395,14 +349,14 @@ String.prototype.abbr = function(l) {
 	return this.substr(0, l - 4) + " ...";
 }
 
-// convert a string from something like "prof_fees" to "Prof Fees"
+// Convert a string from something like "prof_fees" to "Prof Fees"
 String.prototype.toLabel = function() {
 	var s = this.replace( /[_]+/g, " " );
 	s = s.ucwords();
 	return s;
 }
 
-// convert a string from something like "Prof. Fees" to  "prof_fees"
+// Convert a string from something like "Prof. Fees" to  "prof_fees"
 String.prototype.toId = function() {
 	var s = this.toLowerCase();
 	s = s.replace( /[^a-z0-9]+/g, " " );
@@ -411,7 +365,7 @@ String.prototype.toId = function() {
 	return s;
 }
 
-// returns true if string contains all of the arguments
+// Returns true if string contains all of the arguments
 // "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
 String.prototype.looksLike = function() {
     var a = Array.prototype.slice.call(arguments);        // convert arguments to true array
@@ -424,14 +378,17 @@ String.prototype.looksLike = function() {
     return true;
 }
 
-// returns true if the string is a valid email address
+// Returns true if the string is a valid email address
 String.prototype.is_email = function() {
     return /^[A-Za-z0-9_\+-]+(\.[A-Za-z0-9_\+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.([A-Za-z]{2,})$/.test(this);
 }
 
+// So I can use each() instead of forEach
+Array.prototype.each = Array.prototype.forEach;
 
-// returns something like "3 minutes ago"
-// pass truthy value for no_suffix to suppress the " ago" at the end
+
+// Returns something like "3 minutes ago"
+// Pass truthy value for no_suffix to suppress the " ago" at the end
 global.agoStr = function(ts, no_suffix) {
 	if(ts == 0)
 		return "";
@@ -457,10 +414,10 @@ global.agoStr = function(ts, no_suffix) {
     return v + (no_suffix ? "" : " ago");
 }
 
-
 if(isNode) {
+	// We are in Node.js
 
-	// XXX make XHR version of this for browser?
+	// XXX Might be nice if this could fetch URL's too.
 	global.getFile = function(path, enc, cb) {
 		var fs = require("fs");
 		if(!cb) {
@@ -481,10 +438,10 @@ if(isNode) {
 		return h.digest("hex");
 	}
 
-	global.EE = function(ctr) {
+	global.EE = function(Ctr) {
 		var EventEmitter = require("events");
-		require("util").inherits(ctr, EventEmitter);
-		var o = new ctr();
+		require("util").inherits(Ctr, EventEmitter);
+		var o = new Ctr();
 		EventEmitter.call(o);
 		return o;
 	};
@@ -492,7 +449,7 @@ if(isNode) {
 
 }
 else  {
-	// isBrowser
+	// We are in a browser.
 
 	global.LS = {
 		get: function(k) {
@@ -523,8 +480,8 @@ else  {
 		x.send();
 	};
 
-	// shows a browser notification if permission granted.
-	// ask permission if user hasn't yet been asked and honor their choice thereafter.
+	// Shows a browser notification if permission granted.
+	// Ask permission if user hasn't yet been asked and honor their choice thereafter.
 	// title = Title string to show in notice (name of app typically)
 	// text = String message to display.
 	// icon = String path to graphic 
@@ -563,10 +520,38 @@ else  {
 			}
 		}
 		return o
-	}
+	};
 
 	global.getEl = function(id) {
 		return document.getElementById(id);
+	};
+
+	HTMLCollection.prototype.toArray = function() {
+		let arr = [];
+		for(let i = 0; i < this.length; i++) {
+			arr.push( this[ i ]);
+		}
+		return arr;
+	};
+
+	NodeList.prototype.toArray = HTMLCollection.prototype.toArray;
+
+	HTMLElement.prototype.addClass = function(c) {
+		let cl = this.classList;
+		if( ! cl.contains( c ) )
+			cl.add( c );
+		return this;
+	};
+
+	HTMLElement.prototype.remClass = function(c) {
+		let cl = this.classList;
+		if( cl.contains( c ) )
+			cl.remove( c );
+		return this;
+	};
+
+	global.QS = function( qs ) {
+		return document.querySelectorAll( qs ).toArray();
 	};
 
 	HTMLElement.prototype.attr = function(a, v) {
@@ -577,7 +562,7 @@ else  {
 		else {
 			return this.getAttribute(a);
 		}
-	}
+	};
 
 	HTMLElement.prototype.val = function(v) {
 		if(v !== undefined) {
@@ -587,7 +572,7 @@ else  {
 		else {
 			return (this.value || "").trim();
 		}
-	}
+	};
 
 	HTMLElement.prototype.html = function(h) {
 		if(h !== undefined) {
@@ -597,7 +582,7 @@ else  {
 		else {
 			return this.innerHTML;
 		}
-	}
+	};
 
 /* --------- deprecate these -------------- */
 	// return element with id
@@ -610,7 +595,7 @@ else  {
 		return (e.type === "checkbox") ? (e.checked ? 1 : 0) : e.value.trim();
 	}
 
-	// return value of element with id as unix timestamp
+	// return value of element with id as Unix timestamp
 	V.ts = function(id) { return us2ts(V(id)); }
 
 	// return value of element with id as integer
