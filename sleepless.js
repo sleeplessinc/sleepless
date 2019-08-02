@@ -344,7 +344,7 @@ String.prototype.endsWith = function(suffix) {
 String.prototype.abbr = function(l) {
 	l = toInt(l) || 5;
 	if(this.length <= l) {
-		return this;
+		return "" + this;	// Cuz ... some times this === a String object, not a literal
 	}
 	return this.substr(0, l - 4) + " ...";
 }
