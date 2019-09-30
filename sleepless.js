@@ -331,13 +331,17 @@ String.prototype.ucwords = function( sep ) {
 }
 
 // Returns true if the string begins with the prefix string
-String.prototype.startsWith = function(prefix) {
-	return this.substr(0, prefix.length) == prefix;
+if( String.prototype.startsWith === undefined ) {
+	String.prototype.startsWith = function(prefix) {
+		return this.substr(0, prefix.length) == prefix;
+	}
 }
 
 // Returns true if the string ends with the suffix string
-String.prototype.endsWith = function(suffix) {
-	return this.substr(-suffix.length) == suffix;
+if( String.prototype.endsWith === undefined ) {
+	String.prototype.endsWith = function(suffix) {
+		return this.substr(-suffix.length) == suffix;
+	}
 }
 
 // Abbreviate to l chars with ellipses
