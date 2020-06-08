@@ -134,8 +134,11 @@ global.byteSize = function(sz) {
 // return "now" as Unix timestamp
 global.time = function() { return toInt(new Date().getTime() / 1000); }
 
-// convert "YYYY-MM-YY HH:MM:SS" to Unix timestamp
+// convert "YYYY-MM-YY" or "YYYY-MM-YY HH:MM:SS" to Unix timestamp
 global.my2ts = function(m) {
+	if( m.length == 10 && /\d\d\d\d-\d\d-\d\d/.test(m) ) {
+		m += " 00:00:00";
+	}
 	if(m === "0000-00-00 00:00:00") {
 		return 0;
 	}
