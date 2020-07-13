@@ -46,7 +46,7 @@ global.log = function(m) {
 // throw an error if a condition is true
 global.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
 
-// a default no-op function for callbacks
+// XXX Deprecate a default no-op function for callbacks
 global.nop = function(){}
 
 // return json as object or null if error
@@ -56,35 +56,45 @@ global.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null }
 global.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
 // convert an arguments object to real array
-// XXX DEPRECATE - suspect Firefox doesn't like this
+// XXX DEPRECATE - or investigate ... suspect Firefox doesn't like this
 global.args = function(a) { return Array.prototype.slice.call(a); } 
 
-// iterate through an object's attributes
-global.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };	// XXX Use Object.keys() or deprecate
+// XXX Deprecate ... not really that useful
+global.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };
 
 // convert whatever to float
+// E.g. "123.9" --> 123.9, null --> 0.0, undefined --> 0.0, NaN --> 0.0, 123.9 --> 123.9
 global.toFlt = function(v) { return parseFloat((""+v).replace(/[^-.0-9]/g, "")) || 0.0; }
 
 // convert whatever to integer
+// E.g. "123" --> 123, null --> 0, undefined --> 0, NaN --> 0, 123 --> 123, -123.9 --> -124
 global.toInt = function(v) {
 	var n = toFlt(v);
 	return Math[n < 0 ? 'ceil' : 'floor'](n);
 };
 
-// convert from cents to bucks
+// convert from pennies to dollars
+// E.g.  123456 --> 1234.56
 global.centsToBucks = function(cents) {
 	return toFlt( toInt(cents) / 100 );
 }
 global.c2b = global.centsToBucks;
 
-// convert bucks to cents
+// convert dollars to pennies
+// E.g.  1234.56 --> 123456
 global.bucksToCents = function(bucks) {
 	// return Math.round( toFlt(bucks) * 100 ); --> can't use this; It breaks on #'s like 0.285 - )-:
 	return Math.round( (toFlt(bucks) * 1000) / 10 );
 }
 global.b2c = global.bucksToCents;
 
-// format a number into a string with any # of decimal places, & alternative decimal & thousand-separation chars
+// format a number into a string with any # of decimal places, and optional alternative decimal & thousand-separation chars
+// E.g. numFmt( 1234.56 )	// "1,235"
+// E.g. numFmt( 1234.56, 1 )	// "1,234.6"
+// E.g. numFmt( 1234.56, 1, "," )	// "1,234,6"
+// E.g. numFmt( 1234.56, 1, "_" )	// "1,234_6"
+// E.g. numFmt( 1234.56, 1, ",", "." )	// "1.234,6"
+// E.g. numFmt( 1234.56, 1, ".", "" )	// "1234.6"
 global.numFmt = function(n, plcs, dot, sep) {
 	n = toFlt(n);
     sep = typeof sep === "string" ? sep : ",";			// thousands separator char
@@ -102,12 +112,17 @@ global.numFmt = function(n, plcs, dot, sep) {
 		(plcs ? dot + Math.abs(n - intPart).toFixed(plcs).slice(-plcs) : '');
 }
 
-// convert something like 1.234 to a string that looks like "123.4%" with optional decimal places
+// convert something like 0.12 to a string that looks like "12"  with optional alternate decimal and thousands-seperator chars
+// NOTE: there is no "%" added, you have to do that yourself if you want it.
+// E.g. toPct( 0.4 ) + "%"		// "40%"
+// E.g. toPct( 123.4,",", "." )	// "12,340"
 global.toPct = function(n, plcs, dot, sep) {
 	return numFmt(n * 100, plcs, dot, sep);
 }
 
-// convert whatever to a string that looks like "1,234.56"
+// Convert whatever to a string that looks like "1,234.56"
+// E.g. toMoney( 1234.56 )				// "1,234.56"
+// E.g. toMoney( 1234.56, 1, ".", "" )	// "1.234,56"
 global.toMoney = function(n, dot, sep) {
 	return numFmt(n, 2, dot, sep);
 }
@@ -131,8 +146,11 @@ global.byteSize = function(sz) {
 	return numFmt(sz, 1) + " TB"
 }
 
-// return "now" as Unix timestamp
-global.time = function() { return toInt(new Date().getTime() / 1000); }
+// Return Unix timestamp for current time, or for a Date object if provided
+global.time = function( dt ) {
+	if( ! dt ) dt = new Date();
+	return toInt( dt.getTime() / 1000 );
+}
 
 // convert "YYYY-MM-YY" or "YYYY-MM-YY HH:MM:SS" to Unix timestamp
 global.my2ts = function(m) {
@@ -177,21 +195,23 @@ global.ts2my = function(ts) {
 		"";
 }
 
-// convert Unix timestamp to Date 
+// convert Unix timestamp to Date object
+// Returns null if ts is falsey
+// NOTE: One might expect ts2dt() to return a Date object for "now", but it actually returns null.
 global.ts2dt = function(ts) {
 	ts = toInt(ts);
 	return ts ? new Date(ts * 1000) : null;
 };
 
-// convert Date to Unix timestamp
+// convert Date object to Unix timestamp
 global.dt2ts = function(dt) {
 	if(! (dt instanceof Date) )
 		return 0;
 	return toInt(dt.getTime() / 1000);
 };
 
-// Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if "s" can't be parsed
-// If year is 2 digits, it will try guess what you meant
+// Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if string can't be parsed
+// If year is 2 digits, it will try guess the century (not recommended).
 // Time part (HH:MM:SS) can be omitted and seconds is optional
 // if utc argument is truthy, then return a UTC version
 global.us2dt = function(us, utc) {
@@ -311,19 +331,22 @@ global.ts2us_dMy = function(ts) {
 }
 
 
-
 // Make all lowercase
+// E.g.  "Foo".lcase()		// "foo"
 String.prototype.lcase = function() { return this.toLowerCase() }
 
 // Make all uppercase
+// E.g.  "Foo".ucase()		// "FOO"
 String.prototype.ucase = function() { return this.toUpperCase() }
 
 // Capitalize first word
+// E.g.  "foo bar".ucfirst()		// "Foo bar"
 String.prototype.ucfirst = function() {
 	return this.substring(0,1).toUpperCase() + this.substring(1)
 }
 
 // Capitalize all words
+// E.g.  "foo bar".ucwords()		// "Foo Bar"
 String.prototype.ucwords = function( sep ) {
 	sep = sep || /[\s]+/;
 	var a = this.split( sep );
@@ -334,6 +357,8 @@ String.prototype.ucwords = function( sep ) {
 }
 
 // Returns true if the string begins with the prefix string
+// E.g.	"Foobar".startsWith( "Foo" ) 		// true
+// E.g.	"foobar".startsWith( "Foo" ) 		// false
 if( String.prototype.startsWith === undefined ) {
 	String.prototype.startsWith = function(prefix) {
 		return this.substr(0, prefix.length) == prefix;
@@ -341,13 +366,16 @@ if( String.prototype.startsWith === undefined ) {
 }
 
 // Returns true if the string ends with the suffix string
+// E.g.	"Foobar".endsWith( "bar" ) 		// true
+// E.g.	"foobar".endsWith( "Bar" ) 		// false
 if( String.prototype.endsWith === undefined ) {
 	String.prototype.endsWith = function(suffix) {
 		return this.substr(-suffix.length) == suffix;
 	}
 }
 
-// Abbreviate to l chars with ellipses
+// Abbreviate to 'l' chars with ellipses
+// E.g. "CADAFAEL THE BATTLE-DECLINER".abbr(20)	// "CADAFAEL THE BAT ..."
 String.prototype.abbr = function(l) {
 	l = toInt(l) || 5;
 	if(this.length <= l) {
@@ -372,7 +400,7 @@ String.prototype.toId = function() {
 	return s;
 }
 
-// Returns true if string contains all of the arguments
+// Returns true if string contains all of the arguments irrespective of case
 // "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
 String.prototype.looksLike = function() {
     var a = Array.prototype.slice.call(arguments);        // convert arguments to true array
@@ -391,11 +419,14 @@ String.prototype.is_email = function() {
 }
 
 // So I can use each() instead of forEach
+// E.g. [ 1, 2, 3 ].each( n => { ... } );
 Array.prototype.each = Array.prototype.forEach;
 
 
-// Returns something like "3 minutes ago"
-// Pass truthy value for no_suffix to suppress the " ago" at the end
+// Returns a human readable relative time description for a Unix timestmap.
+// E.G. agoStr( time() - 60 ) 	// "60 seconds ago"
+// E.G. agoStr( time() - 63 ) 	// "1 minute ago"
+// Pass a truthy value for argument 'no_suffix' to suppress the " ago" at the end
 global.agoStr = function(ts, no_suffix) {
 	if(ts == 0)
 		return "";
@@ -424,7 +455,7 @@ global.agoStr = function(ts, no_suffix) {
 if(isNode) {
 	// We are in Node.js
 
-	// XXX Might be nice if this could fetch URL's too.
+	// Read a file from disk
 	global.getFile = function(path, enc, cb) {
 		var fs = require("fs");
 		if(!cb) {
@@ -591,7 +622,9 @@ else  {
 		}
 	};
 
-/* --------- deprecate these -------------- */
+
+	/* --------- DEPRECATED -------------- */
+
 	// return element with id
 	I = function(id) { return document.getElementById(id); }
 
@@ -610,7 +643,7 @@ else  {
 
 	// return value of element with id as float
 	V.flt = function(id) { return toFlt(V(id)); }
-/* --------- deprecate these -------------- */
+
 
 }
 
