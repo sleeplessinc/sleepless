@@ -1,7 +1,19 @@
 {
 	"name": "sleepless",
-	"version": "2.9.0",
-	"description": "Sleepless commonly used Javascript enhancement code",
+	"version": "3.0.0",
+	"description": "Sleepless Software Inc. Javascript Library",
 	"author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
-	"repository": "git://github.com/sleeplessinc/sleepless.git"
+	"repository": "git://github.com/sleeplessinc/sleepless.git",
+	"dependencies": {
+		"cache": "^2.3.1",
+		"db": "^3.1.0",
+		"ds": "^1.4.2",
+		"log5": "^2.0.0",
+		"mxu": "^1.3.1",
+		"rplc8": "^1.1.0",
+		"runp": "^1.3.1",
+		"runq": "^1.1.2",
+		"sleepless-markup": "^2.1.0",
+		"sleepless-nav": "^3.1.0"
+	}
 }
