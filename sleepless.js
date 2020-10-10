@@ -653,7 +653,7 @@ IN THE SOFTWARE.
 		t = t.replace(/-{3}/gi, "&mdash;");		// mdash
 		t = t.replace(/-{2}/gi, "&ndash;");		// ndash
 
-		if( navigator !== "undefined" ) {
+		if( typeof navigator !== "undefined" ) {
 			// only supported if running in browser
 			t = t.replace(/\(\s*lastModified\s*\)/gi, document.lastModified);
 		}
@@ -1242,8 +1242,8 @@ IN THE SOFTWARE.
 	// Make all the module properties global (not recommended)
 	M.globalize = function( what ) {
 		let g = isBrowser ? window : global;
-		for( let k in mod ) {
-			g[ k ] = mod[ k ];
+		for( let k in M ) {
+			g[ k ] = M[ k ];
 		}
 	}
 
