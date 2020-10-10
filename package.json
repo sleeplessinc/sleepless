@@ -5,5 +5,7 @@
 	"author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
 	"repository": "git://github.com/sleeplessinc/sleepless.git",
 	"dependencies": {
+		"ds": "^1.4.2",
+		"log5": "^2.0.0"
 	}
 }
