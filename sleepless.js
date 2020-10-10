@@ -446,7 +446,225 @@ IN THE SOFTWARE.
 		return v + (no_suffix ? "" : " ago");
 	}
 
+
+	
+	/*
+	runp()
+	Run some functions in parallel, e.g:
+
+		runp()						// create a runner object
+
+		.add(function(cb) {			// add a simple function that does something
+			// do something.
+			cb();	// call this when it's done
+		})
+
+		.add(function(cb, str) {	// pass in an argument and also return an error
+			// str == "foo"
+			cb("error "+str);
+		}, "foo")
+
+		.add(function(cb, str1, str2) {		// pass in multiple args
+			// str1 == "bar", str2 = "baz"
+			cb(null, "okay "+str1+" "+str2);
+		}, "bar", "baz")
+
+		.add( [ 7, 11 ], function( cb, num, str ) {		// call the func once for each item in an array
+			// this function called twice once with num = 7 and once with num = 11
+			// both times str = "qux"
+			cb(null, "okay "+num+" "+str);
+		}, "qux")
+
+		// All the calls are set up but nothing happens until
+		// I call run() on the runner object, at which point all the functions
+		// will be fired off in parallel.  When they're all completed (okay or fail)
+		// the the call back calls you with an array of errors and results.
+
+		.run(function(errors, results) {
+			// all the functions have completed
+			// errors = [null, "error foo", null, null, null ];
+			// results = [null, null, "okay bar baz", "okay 7 qux", "okay 11 qux" ];
+		})
+	*/
+	M.runp = function() {
+		var o = {};
+		var q = [];
+
+		// Adds a function to the runp object
+		var add = function add() {
+			let args = Array.prototype.slice.call(arguments);
+			if( typeof args[ 0 ] === "function" ) {
+				q.push( args );
+				return o;
+			}
+			// assume it's an array and and 2nd arg is function
+			let arr = args.shift();
+			let fun = args.shift();
+			arr.forEach( x => {
+				q.push( [ fun, x ].concat( args ) );
+			});
+			return o;
+		};
+
+		// Starts all the functions at once
+		var run = function(cb) {
+			var errors = [];
+			var results = [];
+			var num_done = 0;
+			if( q.length == 0 ) {
+				if(cb) {
+					cb(errors, results);
+				}
+				return;
+			}
+			q.forEach(function(args, i) {
+				let fun = args.shift();
+				// Call each function with a callback and an index # (0-based)
+				// The callback expect err, and result arguments.
+				args.unshift( function(e, r) {
+					// One of the functions is finished
+					errors[i] = e || null;
+					results[i] = r || null;
+					num_done += 1;
+					// when all finished, call the cb that was passed into run() with 
+					// a list of errors and results.
+					if(num_done == q.length) {
+						if(cb) {
+							cb(errors, results);
+						}
+					}
+				} );
+				fun.apply( null, args );
+			});
+		};
+
+		o.add = add;
+		o.run = run;
+		return o;
+	}
+
+	/*
+	runq()
+	Run a queue of functions sequentially, e.g:
+		runq()
+		.add(function(cb, a) {
+			cb(null, a + 1);
+		})
+		.add(function(cb, a) {
+			cb(null, a + 1);
+		})
+		.run(function(err, r) {
+			// all done
+			if(err) {
+				// ...
+			}
+			else {
+				console.log(a);		// 3
+			}
+		}, 1)
+	*/
+	M.runq = function() {
+		var o = {};
+		var q = []
+		var add = function(f) {
+			q.push(f);
+			return o;
+		};
+		var run = function(cb, arg) {
+			if(q.length == 0) {
+				cb(null, arg);
+				return;
+			}
+			var f = q.shift();
+			f(function(e, arg) {
+				if(e) {
+					q = [];
+					cb(e, arg);
+				}
+				else {
+					run(cb, arg);
+				}
+			}, arg);
+		};
+		o.add = add
+		o.run = run
+		return o
+	}
+
+
+	// Sort of like Markdown, but not really really.
+	M.markup = function( t ) {
+
+		// nuke CRs
+		t = t.replace(/\r/gi, "\n")
+
+		// remove leading trailing whitespace on all lines
+		t = t.split( /\n/ ).map( l => l.trim() ).join( "\n" );
+
+		// prepend a couple newlines so that regexps below will match at the beginning.
+		t = "\n\n" + t;		// note: will cause a <p> to always appear at start of output
+
+		// one or more blank lines mark a paragraph
+		t = t.replace(/\n\n+/gi, "\n\n<p>\n");
+		
+		// headings h1 and h2
+		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\s*\n/gi, "\n<h1>$1</h1>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n-{5,}\s*\n/gi, "\n<h2>$1</h2>\n" );
+
+		// hyper link/anchor
+		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*\)/gi, "(link $1 $1)");
+		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a href=\"$1\">$2</a>");
+
+		// hyper link/anchor that opens in new window/tab
+		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*\)/gi, "(xlink $1 $1)");
+		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a target=_blank href=\"$1\">$2</a>");
+
+		// image
+		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*\)/gi, "(image $1 $1)");
+		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<img src=\"$1\" title=\"$2\">");
+
+		// figure
+		t = t.replace(/\(\s*figure\s+([^\s\)]+)\s*\)/gi, "(figure $1 $1)");
+		t = t.replace(/\(\s*figure\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<figure><img src=\"$1\" title=\"$2\"><figcaption>$2</figcaption></figure>");
+
+		t = t.replace(/__(([^_]|_[^_])*)__/gi, "<u>$1</u>");		// underline
+		t = t.replace(/\*\*(([^\*]|\*[^\*])*)\*\*/gi, "<em>$1</em>");	// emphasis
+		t = t.replace(/\n\s*"\s*\n([^"]+)"\s*\n/gi, "\n<blockquote>$1</blockquote>\n");	// blockquote
+		t = t.replace(/\n\s*{\s*\n([^"]+)}\s*\n/gi, "\n<blockquote><code>$1</code></blockquote>\n");
+		t = t.replace(/{([^}]+)}/gi, "<code>$1</code>");	// code
+
+		// special
+		t = t.replace(/\(tm\)/gi, "&trade;");	
+		t = t.replace(/\(r\)/gi, "&reg;");	
+		t = t.replace(/\(c\)/gi, "&copy;");
+		t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
+		t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
+
+		// unordered list
+		t = t.replace(/\n((\s*-\s+[^\n]+\n)+)/gi, "\n<ul>\n$1\n</ul>");
+		t = t.replace(/\n\s*-\s+/gi, "\n<li>");
+
+		// ordered list 
+		t = t.replace(/\n((\s*(\d+\.|#)\s+[^\n]+\n)+)/gi, "\n<ol>\n$1\n</ol>");
+		t = t.replace(/\n\s*(\d+\.|#)\s+/gi, "\n<li>");
+
+		// dashes
+		t = t.replace(/\n\s*-{4,}\s*\n/gi, "\n<hr>\n");		// horizontal rule
+		t = t.replace(/-{3}/gi, "&mdash;");		// mdash
+		t = t.replace(/-{2}/gi, "&ndash;");		// ndash
+
+		if( navigator !== "undefined" ) {
+			// only supported if running in browser
+			t = t.replace(/\(\s*lastModified\s*\)/gi, document.lastModified);
+		}
+
+		return t;
+	};
+
+
 	if(isNode) {
+
+		// Node.js only stuff
 
 		// Read a file from disk
 		// Reads async if callback cb is provided,
@@ -483,8 +701,15 @@ IN THE SOFTWARE.
 		};
 
 
-	}
-	else  {
+		// Other modules
+		M.log5 = require( "log5" );
+		M.hreq = require( "hreq" );
+		M.DS = require( "ds" ).DS;
+		M.db = require( "db" );
+
+	} else  {
+
+		// Browser only stuff
 
 		M.LS = {
 			// XXX Add autoconverstion to/from JSON for objects
@@ -635,7 +860,384 @@ IN THE SOFTWARE.
 			}
 		};
 
+
+		// ---------------------------------------
+		// The world renowned rplc8()!
+		// ---------------------------------------
+		(function() {
+
+			// Replaces instances of "__key__" in string s,
+			// with the values from corresponding key in data.
+			let substitute = function( s, data ) {
+				for( let key in data ) {
+					let re = new RegExp( "__" + key + "__", "g" );
+					s = s.replace( re, ""+(data[ key ]) );
+				}
+				return s;
+			}
+
+			// Injects data values into a single DOM element
+			let inject = function( e, data ) {
+
+				// Inject into the body of the element
+				e.innerHTML = substitute( e.innerHTML, data );
+
+				// Inject into the attributes of the actual tag of the element.
+				// Do this slightly differently for IE because IE is stupid.
+				// XXX Do I still have to do this? Isn't IE dead yet?
+				let attrs = e.attributes;
+				if( navigator.appName == "Microsoft Internet Explorer" ) {
+					for( let k in attrs ) {
+						let val = e.getAttribute( k );
+						if( val ) {
+							if( typeof val === "string" ) {
+								if( val.match( /__/ ) ) {
+									val = substitute( val, data );
+									e.setAttribute( k, val );
+								}
+							}
+						}
+					}
+				}
+				else {
+					for( let i = 0 ; i < attrs.length ; i++ ) {
+						let attr = attrs[ i ];
+						let val = attr.value;
+						if( val ) {
+							if( typeof val === "string" ) {
+								if( val.match( /__/ ) ) {
+									attr.value = substitute( val, data );
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// The main function
+			M.rplc8 = function( elem, data, cb ) {
+
+				// If elem isn't a DOM element, then it has to be query selector string
+				if( ! ( elem instanceof HTMLElement ) ) {
+					if( typeof elem !== "string" ) {
+						throw new Error( "rplc8: invalid selector string" );
+					}
+					let coll = document.querySelectorAll( elem );
+					if( coll.length !== 1 ) {
+						throw new Error( "rplc8: selector doesn't match exactly 1 element" );
+					}
+					elem = coll[ 0 ];
+				}
+
+				let sib = elem.nextSibling;		// Might be null.
+				let mom = elem.parentNode;		// Almost certainly not null.
+				let clones = [];
+
+				mom.removeChild( elem );		// Take template out of the DOM.
+
+				let validate_data = function( data ) {
+					// Ensure that data is an array or object
+					if( ! ( data instanceof Array ) ) {
+						// If it's a single object, put it into an array.
+						if( typeof data === "object" ) {
+							data = [ data ];
+						}
+						else {
+							data = [];
+							//throw new Error( "rplc8: Replication is neither array nor object." );
+						}
+					}
+
+					// Ensure that the first element in the array is an object.
+					if( data.length > 0 && typeof data[ 0 ] !== "object" ) {
+						throw new Error( "rplc8: Replication data array does not contain objects." );
+					}
+
+					return data;
+				}
+
+				let obj = { };
+
+				let splice = function( index, remove_count, new_data, cb ) {
+
+					if( index < 0 ) {
+						index = clones.length + index;
+					}
+					if( index > clones.length) {
+						index = clones.length;
+					}
+
+					let sib = clones[ index ] || null;
+
+					if( index < clones.length ) {
+						// remove the old clones
+						let n = 0;
+						while( n < remove_count && index < clones.length ) {
+							let clone = clones.splice( index, 1 )[ 0 ];
+							sib = clone.nextSibling;
+							mom.removeChild( clone );
+							n += 1;
+						}
+					}
+
+					// insert new clones if data provided
+					if( new_data ) {
+						data = validate_data( new_data );
+						let n = 0
+						while( n < data.length ) {
+							let d = data[ n ];						// Get data object from array.
+							let clone = elem.cloneNode( true );		// Clone template element and
+							inject( clone, d );						// inject the data.
+							mom.insertBefore( clone, sib );			// Insert it into the DOM
+							let i = index + n;
+							clones.splice( i, 0, clone );	// insert clone into array
+							if( cb ) {								// If call back function provided,
+								// then call it with a refreshing function
+								cb( clone, d, i, function( new_data, cb ) {
+									splice( i, 1, new_data, cb );
+								});	
+							}
+							n += 1;
+						}
+					}
+
+					return obj;
+				}
+
+				let append = function( data, cb ) {
+					return splice( clones.length, 0, data, cb );
+				}
+
+				let prepend = function( data, cb ) {
+					return splice( 0, 0, data, cb );
+				}
+
+				let update = function( data, cb ) {
+					return splice( 0, clones.length, data, cb );
+				}
+
+				let clear = function( index, count ) {
+					return splice( index || 0, count || clones.length );
+				}
+
+				update( data, cb );
+
+				obj.splice = splice;
+				obj.append = append;
+				obj.prepend = prepend;
+				obj.update = update;
+				obj.clear = clear;
+
+				return obj;
+			};
+
+		})();
+
+
+		// Lets you navigate through pseudo-pages within an actual page
+		// without any actual document fetching from the server.
+		M.Nav = function(data, new_show) {
+
+			if(typeof data === "function") {
+				new_show = data;
+				data = null;
+			}
+
+			if(!data) {
+				// no data object passed in use current query data 
+				var data = {}		// XXX hoisting??
+				var a = document.location.search.split(/[?&]/)
+				a.shift()
+				a.forEach(function(kv) {
+					var p = kv.split("=")
+					data[p[0]] = (p.length > 1) ? decodeURIComponent(p[1]) : ""
+				})
+			}
+
+			var state = { pageYOffset: 0, data: data }
+
+			// build URL + query-string from current path and contents of 'data'
+			var qs = ""
+			for(var k in data) {
+				qs += (qs ? "&" : "?") + k + "=" + encodeURIComponent(data[k])
+			}
+			var url = document.location.pathname + qs
+
+			// if browser doesn't support pushstate, just redirect to the url
+			if(history.pushState === undefined) {
+				document.location = url;
+				return;
+			}
+
+			if(!Nav.current_show) {
+				// 1st time Nav() has been called
+
+				// set current show func to a simple default 
+				Nav.current_show = function(data) {
+					if(data["page"] !== undefined) {
+						// hide all elements with class "page" by setting css display to "none"
+						var pages = document.getElementsByClassName('page')
+						for(var i = 0; i < pages.length; i++ ) {
+							pages[ i ].style.display = "none";
+						}
+						// jump to top of document
+						document.body.scrollIntoView()
+						// show the new page by etting it's css display to ""
+						var p = document.getElementById( "page_"+data.page ).style.display = "inherit"
+					}
+				}
+
+				if(history.replaceState !== undefined) {
+					// set state for the current/initial location
+					history.replaceState(state, "", url)
+					// wire in the pop handler
+					window.onpopstate = function(evt) {
+						if(evt.state) {
+							var data = evt.state
+							Nav.current_show(evt.state.data)
+						}
+					}
+				}
+			}
+			else {
+				// this is 2nd or later call to Nav()
+				state.pageYOffset = window.pageYOffset;
+				history.pushState(state, "", url);
+			}
+
+			// if new show func supplied, start using that one
+			if(new_show) {
+				Nav.current_show = new_show
+			}
+
+			Nav.current_show(data)
+		}
+
+
+
+		// Ties a Javascript object to some user interface elements in the browser DOM.
+		M.MXU = function( base, data ) {
+
+			const form_types = "input select textarea".toUpperCase().split( " " );
+
+			let named_element = function( name ) {
+				return base.querySelector( "[name="+name+"]" );
+			}
+			
+			let proxy = new Proxy( data, {
+
+				get: function( tgt, prop ) {
+					let e = named_element( prop );
+					if( e ) {
+						let v;
+						if( form_types.includes( e.tagName ) ) {
+							if( e.type == "checkbox" ) {
+								v = e.checked;
+							}
+							else {
+								v = e.value;
+							}
+						}
+						else {
+							v = e.innerHTML;
+						}
+						tgt[ prop ] = v;
+					}
+					return tgt[ prop ];
+				},
+
+				set: function( tgt, prop, v ) {
+					tgt[ prop ] = v;
+					let e = named_element( prop );
+					if( e ) {
+						if( form_types.includes( e.tagName ) ) {
+							if( e.type == "checkbox" ) {
+								e.checked = !! v;
+							}
+							else {
+								e.value = v;
+							}
+						}
+						else {
+							e.innerHTML = v;
+						}
+					}
+				},
+
+			});
+
+			for(let key in data ) {
+				proxy[ key ] = data[ key ];
+				let e = named_element( key );
+				if( form_types.includes( e.tagName ) ) {
+					e.onchange = evt => {
+						proxy[ key ] = e.value;
+					}
+				}
+			}
+
+			return proxy;
+		};
+
+
+		// FDrop
+		/*
+		var dt = elem("droptarget");
+		FDrop.attach(dt, function(files, evt) {
+			files = files;
+			var f = files[0];
+			FDrop.mk_data_url(f, function(u) {
+				dt.innerHTML = "<img height=100 src='"+u+"'><br>name="+f.name+"<br>type="+f.type+"<br>size="+f.size+"<p>data url:<p>"+u;
+			});
+
+		});
+		*/
+		(function() {
+
+			let attach = function(element, cb) {
+
+				let style = element.style
+				let old_opacity = style.opacity
+
+				element.ondragenter = function(evt) {
+					style.opacity = "0.5";
+				}
+				element.ondragleave = function(evt) {
+					if(evt.target === element)
+						style.opacity = old_opacity;
+				}
+
+				// for drag/drop to work, element MUST have ondragover AND ondrop defined 
+				element.ondragover = function(evt) {
+					evt.preventDefault();			// required: ondragover MUST call this.
+				}
+				element.ondrop = function(evt) {
+					evt.preventDefault();			// required
+					style.opacity = old_opacity;	// because ondragleave not called on drop (chrome at least)
+					let files = evt.dataTransfer.files
+					cb(files, evt);
+				}
+
+			};
+
+			let mk_data_url = function(f, cb) {
+				let reader = new FileReader();
+				reader.onload = function() {
+					let data = reader.result;
+					cb(data);
+				};
+				reader.readAsDataURL(f);
+			};
+
+			m.FDrop = {
+				attach: attach,
+				mk_data_url: mk_data_url,
+			}
+			
+		})();
+
 	}
+
 
 	// Make all the module properties global (not recommended)
 	M.globalize = function( what ) {
@@ -646,17 +1248,6 @@ IN THE SOFTWARE.
 	}
 
 	if(isNode) {
-
-		M.cache = require( "cache" );
-		M.db = require( "db" );
-		M.ds = require( "ds" );
-		M.log5 = require( "log5" );
-		M.markup = require( "sleepless-markup" );
-		M.mxu = require( "mxu" );
-		M.nav = require( "sleepless-nav" );
-		M.rplc8 = require( "rplc8" );
-		M.runq = require( "runq" );
-		M.runp = require( "runp" );
 
 		module.exports = M;
 
