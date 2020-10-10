@@ -32,7 +32,7 @@ IN THE SOFTWARE.
 			return;		// console doesn't exist in IE unless in debug mode
 		}
 		if(typeof m === "object") {
-			m = o2j(m);
+			m = M.o2j(m);
 		}
 		return console.log(m);
 	}
@@ -60,22 +60,22 @@ IN THE SOFTWARE.
 	// convert whatever to integer or 0 if not at all numberlike
 	// E.g. "123" --> 123, null --> 0, undefined --> 0, NaN --> 0, 123 --> 123, -123.9 --> -124
 	M.toInt = function(v) {
-		var n = toFlt(v);
+		var n = M.toFlt(v);
 		return Math[n < 0 ? 'ceil' : 'floor'](n);
 	};
 
 	// convert from pennies to dollars
 	// E.g.  123456 --> 1234.56
 	M.centsToBucks = function(cents) {
-		return toFlt( toInt(cents) / 100 );
+		return M.toFlt( M.toInt(cents) / 100 );
 	}
 	M.c2b = M.centsToBucks;
 
 	// convert dollars to pennies
 	// E.g.  1234.56 --> 123456
 	M.bucksToCents = function(bucks) {
-		// return Math.round( toFlt(bucks) * 100 ); --> can't use this; It breaks on #'s like 0.285 - )-:
-		return Math.round( (toFlt(bucks) * 1000) / 10 );
+		// return Math.round( M.toFlt(bucks) * 100 ); --> can't use this; It breaks on #'s like 0.285 - )-:
+		return Math.round( (M.toFlt(bucks) * 1000) / 10 );
 	}
 	M.b2c = M.bucksToCents;
 
@@ -88,10 +88,10 @@ IN THE SOFTWARE.
 	// numFmt( 1234.56, 1, ",", "." )	// "1.234,6"
 	// numFmt( 1234.56, 1, ".", "" )	// "1234.6"
 	M.numFmt = function(n, plcs, dot, sep) {
-		n = toFlt(n);
+		n = M.toFlt(n);
 		sep = typeof sep === "string" ? sep : ",";			// thousands separator char
 		dot = typeof dot === "string" ? dot : ".";			// decimal point char
-		plcs = toInt(plcs);
+		plcs = M.toInt(plcs);
 		var p = Math.pow(10, plcs);
 		var n = Math.round( n * p ) / p;
 		var sign = n < 0 ? '-' : '';
@@ -110,14 +110,14 @@ IN THE SOFTWARE.
 	// toPct( 0.4 ) + "%"		// "40%"
 	// toPct( 123.4,",", "." )	// "12,340"
 	M.toPct = function(n, plcs, dot, sep) {
-		return numFmt(n * 100, plcs, dot, sep);
+		return M.numFmt(n * 100, plcs, dot, sep);
 	}
 
 	// Convert whatever to a string that looks like "1,234.56"
 	// E.g. toMoney( 1234.56 )				// "1,234.56"
 	// E.g. toMoney( 1234.56, 1, ".", "" )	// "1.234,56"
 	M.toMoney = function(n, dot, sep) {
-		return numFmt(n, 2, dot, sep);
+		return M.numFmt(n, 2, dot, sep);
 	}
 
 	// Returns a human readable string that describes 'n' as a number of bytes,
@@ -126,24 +126,24 @@ IN THE SOFTWARE.
 		if(typeof sz != "number")
 			return sz;
 		if(sz < 1024)
-			return numFmt(sz, 0) + " B"
+			return M.numFmt(sz, 0) + " B"
 		sz = sz / 1024
 		if(sz < 1024)
-			return numFmt(sz, 1) + " KB"
+			return M.numFmt(sz, 1) + " KB"
 		sz = sz / 1024
 		if(sz < 1024)
-			return numFmt(sz, 1) + " MB"
+			return M.numFmt(sz, 1) + " MB"
 		sz = sz / 1024
 		if(sz < 1024)
-			return numFmt(sz, 1) + " GB"
+			return M.numFmt(sz, 1) + " GB"
 		sz = sz / 1024
-		return numFmt(sz, 1) + " TB"
+		return M.numFmt(sz, 1) + " TB"
 	}
 
 	// Return a Unix timestamp for current time, or for a Date object if provided
 	M.time = function( dt ) {
 		if( ! dt ) dt = new Date();
-		return toInt( dt.getTime() / 1000 );
+		return M.toInt( dt.getTime() / 1000 );
 	}
 
 	// convert "YYYY-MM-YY" or "YYYY-MM-YY HH:MM:SS" to Unix timestamp
@@ -158,19 +158,19 @@ IN THE SOFTWARE.
 		if(a.length != 6) {
 			return 0;
 		}
-		var year = toInt(a[0]);
-		var month = toInt(a[1]);
-		var day = toInt(a[2]);
-		var hour = toInt(a[3]);
-		var minute = toInt(a[4]);
-		var second = toInt(a[5]);
+		var year = M.toInt(a[0]);
+		var month = M.toInt(a[1]);
+		var day = M.toInt(a[2]);
+		var hour = M.toInt(a[3]);
+		var minute = M.toInt(a[4]);
+		var second = M.toInt(a[5]);
 		var d = new Date(year, month - 1, day, hour, minute, second, 0);
-		return toInt(d.getTime() / 1000);
+		return M.toInt(d.getTime() / 1000);
 	}
 
 	// convert Unix timestamp to "YYYY-MM-DD HH:MM:SS"
 	M.ts2my = function(ts) {
-		var d = ts2dt(ts);
+		var d = M.ts2dt(ts);
 		if(!d) {
 			return "";
 		}
@@ -191,9 +191,9 @@ IN THE SOFTWARE.
 
 	// Convert Unix timestamp to Date object
 	// Returns null if ts is falsey
-	// NOTE: One might expect ts2dt() to return a Date object for "now", but it actually returns null.
+	// NOTE: One might expect M.ts2dt() to return a Date object for "now", but it actually returns null.
 	M.ts2dt = function(ts) {
-		ts = toInt(ts);
+		ts = M.toInt(ts);
 		return ts ? new Date(ts * 1000) : null;
 	};
 
@@ -201,7 +201,7 @@ IN THE SOFTWARE.
 	M.dt2ts = function(dt) {
 		if(! (dt instanceof Date) )
 			return 0;
-		return toInt(dt.getTime() / 1000);
+		return M.toInt(dt.getTime() / 1000);
 	};
 
 	// Convert "MM/DD/YYYY HH:MM:SS" to Date object or null if string can't be parsed
@@ -224,20 +224,20 @@ IN THE SOFTWARE.
 		}
 
 		// try to convert 2 digit year to 4 digits (best guess)
-		var year = toInt(m[2]);
+		var year = M.toInt(m[2]);
 		var nowyear = new Date().getFullYear();
 		if(year <= ((nowyear + 10) - 2000))
 			year = 2000 + year;
 		if(year < 100)
 			year = 1900 + year;
 
-		var mon = toInt(m[0]) - 1;
-		var date = toInt(m[1]);
+		var mon = M.toInt(m[0]) - 1;
+		var date = M.toInt(m[1]);
 
-		var hour = toInt(m[3]);
-		var min = toInt(m[4]);
-		var sec = toInt(m[5]);
-		var ms = toInt(m[6]);
+		var hour = M.toInt(m[3]);
+		var min = M.toInt(m[4]);
+		var sec = M.toInt(m[5]);
+		var ms = M.toInt(m[6]);
 
 		if(utc) {
 			return new Date(Date.UTC(year, mon, date, hour, min, sec, ms));
@@ -249,12 +249,12 @@ IN THE SOFTWARE.
 	// Convert "MM/DD/YYYY HH:MM:SS" to Unix timestamp.
 	// If utc argument is truthy, then return a UTC version.
 	M.us2ts = function(us, utc) {
-		return dt2ts(us2dt(us, utc));
+		return M.dt2ts(M.us2dt(us, utc));
 	}
 
 	// Convert Unix timestamp to "MM/DD/YYYY HH:MM:SS".
 	M.ts2us = function(ts) {
-		var d = ts2dt(ts);
+		var d = M.ts2dt(ts);
 		if(!d) {
 			return "";
 		}
@@ -275,17 +275,17 @@ IN THE SOFTWARE.
 
 	// Convert Unix timestamp to "MM/DD".
 	M.ts2us_md = function(ts) {
-		return ts2us(ts).substr(0, 5);
+		return M.ts2us(ts).substr(0, 5);
 	}
 
 	// Convert Unix timestamp to "MM/DD/YYYY".
 	M.ts2us_mdy = function(ts) {
-		return ts2us(ts).substr(0, 10);
+		return M.ts2us(ts).substr(0, 10);
 	}
 
 	// Convert Unix timestamp to "MM/DD/YY"
 	M.ts2us_mdy2 = function(ts) {
-		var a = ts2us_mdy(ts).split("/");
+		var a = M.ts2us_mdy(ts).split("/");
 		if(a.length != 3) {
 			return a;
 		}
@@ -295,22 +295,22 @@ IN THE SOFTWARE.
 
 	// Convert Unix timestamp to "HH:MM"
 	M.ts2us_hm = function(ts) {
-		return ts2us(ts).substr(11, 5);
+		return M.ts2us(ts).substr(11, 5);
 	}
 
 	// Convert Unix timestamp to "MM/DD/YYYY HH:MM"
 	M.ts2us_mdyhm = function(ts) {
-		return ts2us_mdy(ts) + " " + ts2us_hm(ts);
+		return M.ts2us_mdy(ts) + " " + M.ts2us_hm(ts);
 	}
 
 	// Convert Unix timestamp to "MM/DD/YY HH:MM"
 	M.ts2us_mdy2hm = function(ts) {
-		return ts2us_mdy2(ts) + " " + ts2us_hm(ts);
+		return M.ts2us_mdy2(ts) + " " + M.ts2us_hm(ts);
 	}
 
 	// Convert Unix timestamp to something like "01-Jan-2016"
 	M.ts2us_dMy = function(ts) {
-		var d = ts2dt(ts);
+		var d = M.ts2dt(ts);
 		if(!d) {
 			return "";
 		}
@@ -370,7 +370,7 @@ IN THE SOFTWARE.
 	// Abbreviate to 'l' chars with ellipses
 	// E.g. "CADAFAEL THE BATTLE-DECLINER".abbr(20)	// "CADAFAEL THE BAT ..."
 	String.prototype.abbr = function(l) {
-		l = toInt(l) || 5;
+		l = M.toInt(l) || 5;
 		if(this.length <= l) {
 			return "" + this;	// Cuz ... some times this === a String object, not a literal
 		}
@@ -425,7 +425,7 @@ IN THE SOFTWARE.
 		if(ts == 0)
 			return "";
 
-		var t = time() - ts;
+		var t = M.time() - ts;
 		if(t < 1)
 			return "Just now";
 
@@ -440,7 +440,7 @@ IN THE SOFTWARE.
 		else if(t>60) v = round(t/60,0)+' minute'; 
 		else v = t+' second'; 
 			
-		if(toInt(v) > 1)
+		if(M.toInt(v) > 1)
 			v += 's'; 
 
 		return v + (no_suffix ? "" : " ago");
