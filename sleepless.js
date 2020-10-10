@@ -703,9 +703,9 @@ IN THE SOFTWARE.
 
 		// Other modules
 		M.log5 = require( "log5" );
-		M.hreq = require( "hreq" );
+		//M.hreq = require( "hreq" );	// need to remove dependency on old sleepless
 		M.DS = require( "ds" ).DS;
-		M.db = require( "db" );
+		//M.db = require( "db" );	// need to remove dependency on old sleepless
 
 	} else  {
 
