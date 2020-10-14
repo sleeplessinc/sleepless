@@ -707,7 +707,7 @@ IN THE SOFTWARE.
 		M.DS = require( "ds" ).DS;
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
 
-	} else  {
+	} else {
 
 		// Browser only stuff
 
@@ -741,6 +741,29 @@ IN THE SOFTWARE.
 			x.open("GET", url);
 			x.send();
 		};
+
+
+		M.postJSON = function( url, data, okay, fail ) {
+			let xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				let r = j2o( xhr.responseText );
+				if( ! r ) {
+					fail( "Error processing response from server." );
+					return;
+				}
+				if( r.error ) {
+					fail( r.error );
+					return;
+				}
+				okay( r, xhr );
+			};
+			xhr.onerror = fail;
+			xhr.open( "POST", url );
+			xhr.setRequestHeader( "Content-Type", "application/json" );
+			xhr.setRequestHeader( "Accept", "applicaiton/json" );
+			xhr.send( o2j( data ) );
+		}
+
 
 		// Shows a browser notification if permission granted.
 		// Ask permission if user hasn't yet been asked and honor their choice thereafter.
@@ -1114,7 +1137,6 @@ IN THE SOFTWARE.
 		}
 
 
-
 		// Ties a Javascript object to some user interface elements in the browser DOM.
 		M.MXU = function( base, data ) {
 
@@ -1169,7 +1191,7 @@ IN THE SOFTWARE.
 			for(let key in data ) {
 				proxy[ key ] = data[ key ];
 				let e = named_element( key );
-				if( form_types.includes( e.tagName ) ) {
+				if( e && form_types.includes( e.tagName ) ) {
 					e.onchange = evt => {
 						proxy[ key ] = e.value;
 					}
@@ -1229,7 +1251,7 @@ IN THE SOFTWARE.
 				reader.readAsDataURL(f);
 			};
 
-			m.FDrop = {
+			M.FDrop = {
 				attach: attach,
 				mk_data_url: mk_data_url,
 			}
