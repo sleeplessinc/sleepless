@@ -1269,6 +1269,21 @@ IN THE SOFTWARE.
 	}
 
 
+	M.scale_data_image = function( image_data_url, new_width, new_height, cb ) {
+		let img = new Image();
+		img.onload = function() {
+			let cnv = document.createElement( "canvas" );
+			cnv.width = new_width;
+			cnv.height = new_height;
+			var ctx = cnv.getContext("2d");
+			ctx.drawImage(img, 0, 0, new_width, new_height);
+			let new_data_url = cnv.toDataURL( "image/jpeg", 0.5 );
+			cb( new_data_url );
+		}
+		img.src = image_data_url;
+	}
+
+
 	// Make all the module properties global (not recommended)
 	M.globalize = function( what ) {
 		let g = isBrowser ? window : global;
