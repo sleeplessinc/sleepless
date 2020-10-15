@@ -760,7 +760,7 @@ IN THE SOFTWARE.
 			xhr.onerror = fail;
 			xhr.open( "POST", url );
 			xhr.setRequestHeader( "Content-Type", "application/json" );
-			xhr.setRequestHeader( "Accept", "applicaiton/json" );
+			xhr.setRequestHeader( "Accept", "application/json" );
 			xhr.send( o2j( data ) );
 		}
 
