@@ -850,6 +850,14 @@ IN THE SOFTWARE.
 			return M.QS( qs )[ 0 ];
 		};
 
+		HTMLElement.prototype.find = function( qs ) {
+			return this.querySelectorAll( qs ).toArray();
+		}
+
+		HTMLElement.prototype.find1 = function( qs ) {
+			return this.find( qs )[ 0 ];
+		}
+
 		// Get (or set if v is provided) an attribute's value
 		HTMLElement.prototype.attr = function(a, v) {
 			if(v !== undefined) {
