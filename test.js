@@ -138,6 +138,15 @@ t.on("foo", function(n) {
 })
 t.emit("foo", t.name);
 
-log("Okay");
+post_json( {
+	url: "https://api.sleepless.com/v2/blog"
+}, data => {
+	throwIf( typeof data !== "object" );
+	log("Okay.");
+}, err => {
+	throw err;
+});
+
+
 
 

@@ -713,9 +713,47 @@ IN THE SOFTWARE.
 
 		// Other modules
 		M.log5 = require( "log5" );
-		M.hreq = require( "hreq" );
 		M.DS = require( "ds" ).DS;
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
+
+		// post_json( { url: "...", data: { ... }, ... }, okay, fail )
+		// url is required 
+		M.post_json = function( options, cb_okay, cb_fail ) {
+			let opts = j2o( o2j( options ) );	// clone it so I'm modifying my own copy
+			let okay = cb_okay || function(){};
+			let fail = cb_fail || function(){};
+			opts.method = "POST";
+			opts.headers = {
+				"Content-Type": "application/json",	// will always send this, and ...
+				"Accept": "application/json",		// will accept this in response
+			}
+			let json = "";	// collected response
+			let req = require( "https" ).request( opts.url, opts, res => {
+				res.setEncoding( "utf8" );
+				res.on( "data", chunk => { json += chunk; } );
+				res.on( "end", () => {
+					let { statusCode, headers } = res;
+					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
+						okay( j2o( json ), res );
+					} else {
+						if( statusCode >= 300  && statusCode < 400 ) {	// if it's a redirect ...
+							opts.redirects = toInt( opts.redirects ) + 1;
+							if( opts.redirects > 10 ) {	// if we appear to be looping endlessly ...
+								fail( "TOO MANY REDIRECTS", res );
+							} else {	// otherwise ...
+								opts.url = headers[ "location" ] || headers[ "Location" ];
+								hreq( opts, okay, fail );	// try the new location
+							}
+						} else {	// otherwise ...
+							fail( "HTTP ERROR "+statusCode, res );	// just give up.
+						}
+					}
+				});
+			});
+			req.on( "error", fail );
+			req.write( o2j( opts.data || {} ) );
+			req.end();
+		};
 
 	} else {
 
