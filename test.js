@@ -1,11 +1,9 @@
 
 var l = console.log
-require("./sleepless.js")
+require("./sleepless.js").globalize();
 
 o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
 j = JSON.stringify(o);
-
-throwIf( typeof nop !== "function" );
 
 throwIf( o2j(o) !== j );
 throwIf( o2j(j2o(j)) !== j );
@@ -140,7 +138,6 @@ t.on("foo", function(n) {
 })
 t.emit("foo", t.name);
 
-if(isBrowser) {
-}
+log("Okay");
 
 

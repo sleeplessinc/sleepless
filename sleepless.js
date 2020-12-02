@@ -324,6 +324,16 @@ IN THE SOFTWARE.
 	}
 
 
+	// return an array containing only distinct values.
+	Array.prototype.distinct = function( cb ) {
+		let hash = {};
+		for( let el of this ) {
+			hash[ cb ? cb( el ) : (""+el) ] = true;
+		}
+		return Object.keys( hash );
+	}
+
+
 	// Make all lowercase
 	// E.g.  "Foo".lcase()		// "foo"
 	String.prototype.lcase = function() { return this.toLowerCase() }
@@ -703,7 +713,7 @@ IN THE SOFTWARE.
 
 		// Other modules
 		M.log5 = require( "log5" );
-		//M.hreq = require( "hreq" );	// need to remove dependency on old sleepless
+		M.hreq = require( "hreq" );
 		M.DS = require( "ds" ).DS;
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
 
@@ -1113,7 +1123,7 @@ IN THE SOFTWARE.
 						}
 						// jump to top of document
 						document.body.scrollIntoView()
-						// show the new page by etting it's css display to ""
+						// show the new page
 						var p = document.getElementById( "page_"+data.page ).style.display = "inherit"
 					}
 				}
