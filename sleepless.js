@@ -745,7 +745,7 @@ IN THE SOFTWARE.
 								M.post_json( opts, okay, fail );	// try the new location
 							}
 						} else {	// otherwise ...
-							fail( "HTTP ERROR "+statusCode, res );	// just give up.
+							fail( "HTTP ERROR "+statusCode, json, req );	// just give up.
 						}
 					}
 				});
