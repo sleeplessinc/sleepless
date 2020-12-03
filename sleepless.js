@@ -764,7 +764,7 @@ IN THE SOFTWARE.
 				res.write( json );
 				res.end();
 			};
-			res.fail = ( error ) => { res.done( error, null ); };
+			res.fail = ( error, body ) => { res.done( error, body ); };
 			res.okay = ( data ) => { res.done( null, data ); };
 			next();
 		};
