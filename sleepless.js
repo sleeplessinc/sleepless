@@ -742,7 +742,7 @@ IN THE SOFTWARE.
 								fail( "TOO MANY REDIRECTS", res );
 							} else {	// otherwise ...
 								opts.url = headers[ "location" ] || headers[ "Location" ];
-								hreq( opts, okay, fail );	// try the new location
+								M.post_json( opts, okay, fail );	// try the new location
 							}
 						} else {	// otherwise ...
 							fail( "HTTP ERROR "+statusCode, res );	// just give up.
@@ -753,6 +753,20 @@ IN THE SOFTWARE.
 			req.on( "error", fail );
 			req.write( o2j( opts.data || {} ) );
 			req.end();
+		};
+
+		// This is a connect/express middleware that creates okay()/fail() functions on the response
+		// object for responding to an HTTP request with a JSON payload.
+		M.mw_fin_json = function( req, res, next ) {
+			res.done = ( error, data ) => {
+				let json = JSON.stringify( { error, data } );
+				res.writeHead( 200, { "Content-Type": "application/json", });
+				res.write( json );
+				res.end();
+			};
+			res.fail = ( error ) => { res.done( error, null ); };
+			res.okay = ( data ) => { res.done( null, data ); };
+			next();
 		};
 
 	} else {
