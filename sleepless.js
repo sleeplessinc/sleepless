@@ -716,10 +716,57 @@ IN THE SOFTWARE.
 		M.DS = require( "ds" ).DS;
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
 
+
+		M.get_json = function( url, data, cb_okay, cb_fail, num_redirects ) {
+			let okay = cb_okay || function(){};
+			let fail = cb_fail || function(){};
+			let arr = [];
+			for( let k in data ) {
+				arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
+			}
+			if( arr.length > 0 ) {
+				url += "?" + arr.join( "&" );
+			}
+			num_redirects = M.toInt( num_redirects );
+			if( num_redirects > 5 ) {
+				fail( "Too many redirects" ); // we appear to be looping
+				return;
+			}
+			let opts = {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",	// will always send this, and ...
+					"Accept": "application/json",		// will accept this in response
+				}
+			};
+			let json = "";	// collected response
+			let req = require( "https" ).request( url, opts, res => {
+				res.setEncoding( "utf8" );
+				res.on( "data", chunk => { json += chunk; } );
+				res.on( "end", () => {
+					let { statusCode, headers } = res;
+					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
+						okay( M.j2o( json ), res );		// done!
+					} else {
+						if( statusCode >= 300 && statusCode < 400 ) {	// if it's a redirect ...
+							let url = headers[ "location" ] || headers[ "Location" ];
+							get_json( url, okay, fail, num_redirects + 1 );	// recursively try the new location
+						} else {	// otherwise ...
+							fail( "HTTP Error "+statusCode, json, req );	// just give up.
+						}
+					}
+				});
+			});
+			req.on( "error", fail );
+			req.write("");
+			req.end();
+		};
+
+
 		// post_json( { url: "...", data: { ... }, ... }, okay, fail )
 		// url is required 
 		M.post_json = function( options, cb_okay, cb_fail ) {
-			let opts = j2o( o2j( options ) );	// clone it so I'm modifying my own copy
+			let opts = M.j2o( M.o2j( options ) );	// clone it so I'm modifying my own copy
 			let okay = cb_okay || function(){};
 			let fail = cb_fail || function(){};
 			opts.method = "POST";
@@ -734,7 +781,7 @@ IN THE SOFTWARE.
 				res.on( "end", () => {
 					let { statusCode, headers } = res;
 					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
-						okay( j2o( json ), res );
+						okay( M.j2o( json ), res );
 					} else {
 						if( statusCode >= 300  && statusCode < 400 ) {	// if it's a redirect ...
 							opts.redirects = toInt( opts.redirects ) + 1;
@@ -751,7 +798,7 @@ IN THE SOFTWARE.
 				});
 			});
 			req.on( "error", fail );
-			req.write( o2j( opts.data || {} ) );
+			req.write( M.o2j( opts.data || {} ) );
 			req.end();
 		};
 
@@ -808,7 +855,7 @@ IN THE SOFTWARE.
 		M.postJSON = function( url, data, okay, fail ) {
 			let xhr = new XMLHttpRequest();
 			xhr.onload = function() {
-				let r = j2o( xhr.responseText );
+				let r = M.j2o( xhr.responseText );
 				if( ! r ) {
 					fail( "Error processing response from server." );
 					return;
@@ -823,7 +870,7 @@ IN THE SOFTWARE.
 			xhr.open( "POST", url );
 			xhr.setRequestHeader( "Content-Type", "application/json" );
 			xhr.setRequestHeader( "Accept", "application/json" );
-			xhr.send( o2j( data ) );
+			xhr.send( M.o2j( data ) );
 		}
 
 

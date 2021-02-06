@@ -138,14 +138,22 @@ t.on("foo", function(n) {
 })
 t.emit("foo", t.name);
 
-post_json( {
-	url: "https://api.sleepless.com/v2/blog"
-}, data => {
+get_json( "https://api.sleepless.com/v2/blog", {}, data => {
 	throwIf( typeof data !== "object" );
-	log("Okay.");
+
+	post_json( {
+		url: "https://api.sleepless.com/v2/blog"
+	}, data => {
+		throwIf( typeof data !== "object" );
+		log("Okay.");
+	}, err => {
+		throw err;
+	});
+
 }, err => {
 	throw err;
 });
+
 
 
 
