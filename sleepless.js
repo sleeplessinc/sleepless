@@ -864,7 +864,7 @@ IN THE SOFTWARE.
 					fail( r.error );
 					return;
 				}
-				okay( r, xhr );
+				okay( r.data, xhr );
 			};
 			xhr.onerror = fail;
 			xhr.open( "POST", url );
@@ -999,6 +999,19 @@ IN THE SOFTWARE.
 				return this.innerHTML;
 			}
 		};
+
+		// handy thing to grab the data out of a form
+		HTMLFormElement.prototype.getData = function() {
+			const types = "input select textarea".toUpperCase().split( " " );
+			let data = {};
+			for( let i = 0 ; i < this.elements.length ; i++ ) {
+				const e = this.elements[ i ];
+				if( types.includes( e.tagName ) ) {
+					data[ e.name ] = e.value;
+				}
+			}
+			return data;
+		}
 
 
 		// ---------------------------------------
