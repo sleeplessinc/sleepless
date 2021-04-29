@@ -602,74 +602,125 @@ IN THE SOFTWARE.
 	}
 
 
-	// Sort of like Markdown, but not really really.
+	// Sort of like Markdown, but not really.
 	M.markup = function( t ) {
 
 		// nuke CRs
 		t = t.replace(/\r/gi, "\n")
 
-		// remove leading trailing whitespace on all lines
+		// remove leading/trailing whitespace on all lines
 		t = t.split( /\n/ ).map( l => l.trim() ).join( "\n" );
 
-		// prepend a couple newlines so that regexps below will match at the beginning.
-		t = "\n\n" + t;		// note: will cause a <p> to always appear at start of output
+		// append/prepend a couple newlines so that regexps below will match at beginning and end
+		t = "\n\n" + t + "\n\n";		// note: will cause a <p> to always appear at start of output
 
 		// one or more blank lines mark a paragraph
 		t = t.replace(/\n\n+/gi, "\n\n<p>\n");
 		
 		// headings h1 and h2
-		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\s*\n/gi, "\n<h1>$1</h1>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n-{5,}\s*\n/gi, "\n<h2>$1</h2>\n" );
+		// Heading 1
+		// =========
+		// Heading 2
+		// ---------
+		// Heading 3
+		// - - - - -
+		// Heading 4
+		// -  -  -  -  -
+		// Heading 5
+		// -   -   -   -   -
+		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n-{5,}\n/gi, "\n<h2>$1</h2>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s){4,}\n/gi, "\n<h3>$1</h3>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s){4,}\n/gi, "\n<h4>$1</h4>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s\s){4,}\n/gi, "\n<h5>$1</h5>\n" );
 
 		// hyper link/anchor
+		// (link url)
+		// (link url alt_display_text)
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*\)/gi, "(link $1 $1)");
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a href=\"$1\">$2</a>");
 
 		// hyper link/anchor that opens in new window/tab
+		// (xlink url)
+		// (xlink url alt_display_text)
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*\)/gi, "(xlink $1 $1)");
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a target=_blank href=\"$1\">$2</a>");
 
 		// image
+		// (image src title)
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*\)/gi, "(image $1 $1)");
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<img src=\"$1\" title=\"$2\">");
 
 		// figure
+		// (figure src caption)
 		t = t.replace(/\(\s*figure\s+([^\s\)]+)\s*\)/gi, "(figure $1 $1)");
 		t = t.replace(/\(\s*figure\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<figure><img src=\"$1\" title=\"$2\"><figcaption>$2</figcaption></figure>");
 
+		// styles
+		// __underline__
+		// **emphasis**
 		t = t.replace(/__(([^_]|_[^_])*)__/gi, "<u>$1</u>");		// underline
 		t = t.replace(/\*\*(([^\*]|\*[^\*])*)\*\*/gi, "<em>$1</em>");	// emphasis
+
+		// "
+		// block quote text
+		// "
 		t = t.replace(/\n\s*"\s*\n([^"]+)"\s*\n/gi, "\n<blockquote>$1</blockquote>\n");	// blockquote
+
+		// {
+		// code
+		// }
+		// foo { code } bar
 		t = t.replace(/\n\s*{\s*\n([^"]+)}\s*\n/gi, "\n<blockquote><code>$1</code></blockquote>\n");
 		t = t.replace(/{([^}]+)}/gi, "<code>$1</code>");	// code
 
-		// special
+		// symbols
+		// (tm)	
+		// (r)
+		// (c)
+		// (cy)				"(C) 2021"
+		// (cm Foocorp)		"(C) 2021 Foocorp All Rights Reserved"
 		t = t.replace(/\(tm\)/gi, "&trade;");	
 		t = t.replace(/\(r\)/gi, "&reg;");	
 		t = t.replace(/\(c\)/gi, "&copy;");
 		t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
 		t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
 
-		// unordered list
+		// Unordered list
+		// - item 
+		// - item
 		t = t.replace(/\n((\s*-\s+[^\n]+\n)+)/gi, "\n<ul>\n$1\n</ul>");
 		t = t.replace(/\n\s*-\s+/gi, "\n<li>");
 
-		// ordered list 
-		t = t.replace(/\n((\s*(\d+\.|#)\s+[^\n]+\n)+)/gi, "\n<ol>\n$1\n</ol>");
-		t = t.replace(/\n\s*(\d+\.|#)\s+/gi, "\n<li>");
+		// Ordered list 
+		// 1. item 1
+		// # item 2
+		// 1. item 3
+		t = t.replace(/\n((\s*(\d+|#)\.?\s+[^\n]+\n)+)/gi, "\n<ol>\n$1\n</ol>");
+		t = t.replace(/\n(\d+|#)\.?\s+([^\n]+)/gi, "\n<li>$2</li>");
 
-		// dashes
+		// Horiz. rule
+		// ---- (4 or more dashes)
 		t = t.replace(/\n\s*-{4,}\s*\n/gi, "\n<hr>\n");		// horizontal rule
+
+		// Dashes
+		// --  (n-dash)
+		// ---  (m-dash)
 		t = t.replace(/-{3}/gi, "&mdash;");		// mdash
 		t = t.replace(/-{2}/gi, "&ndash;");		// ndash
 
 		if( typeof navigator !== "undefined" ) {
-			// only supported if running in browser
+			// Only supported if running in browser
+
+			// (lastModified)		// last modified data of document.
 			t = t.replace(/\(\s*lastModified\s*\)/gi, document.lastModified);
 		}
 
 		return t;
 	};
+	M.t2h = M.markup;		// alternate name for markup
 
 
 	if(isNode) {
