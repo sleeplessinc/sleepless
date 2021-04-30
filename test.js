@@ -171,6 +171,11 @@ if( isBrowser ) {
 	LS.clear();
 }
 
-
+L = log5.mkLog( "log5: " )(5);
+L.E( "error" );
+L.W( "warning" );
+L.I( "info" );
+L.V( "verbose" );
+L.D( "debug" );
 
 

@@ -716,6 +716,108 @@ IN THE SOFTWARE.
 	M.t2h = M.markup;		// alternate name for markup
 
 
+	// The inimitable Log5 ...
+	(function() {
+		var util = null;
+		var style = null;
+		if( isNode ) {
+			util = require( "util" );
+			style = require( "./ansi-styles.js" );
+		}
+		const n0 = function(n) {
+			if(n >= 0 && n < 10)
+				return "0"+n
+			return n
+		}
+		const ts = function() {
+			var d = new Date()
+			return d.getFullYear() + "-" +
+				n0(d.getMonth()+1) + "-" +
+				n0(d.getDate()) + "_" +
+				n0(d.getHours()) + ":" +
+				n0(d.getMinutes()) + ":" +
+				n0(d.getSeconds())
+
+		}
+		const mkLog = function(prefix) {
+			prefix = " " + (prefix || "")
+			var o = {}
+			o.logLevel = 0
+			var f = function logFunc( l ) {
+				var n = 0, ll = l
+				if( typeof l === "number" ) {	// if first arg is a number ...
+					if(arguments.length == 1) {	// and it's the only arg ...
+						o.logLevel = l			// set logLevel to l
+						return logFunc			// and return
+					}
+					// there are more args after the number
+					n = 1	// remove the number from arguments array
+				}
+				else {
+					ll = 0	// first arg is not number, log level for this call is 0
+				}
+				if( o.logLevel < ll )	// if log level is below the one given in this call ...
+					return logFunc;		// just do nothing and return 
+				let s = ts() + prefix;
+				for( var i = n; i < arguments.length; i++ ) {	// step through args
+					let x = arguments[ i ];
+					if( x === undefined ) {
+						x = "undefined";
+					}
+					if( typeof x === "object" ) {	// if arg is an object ...
+						if( isNode ) {				// and we're in node ...
+							x = util.inspect( x, { depth: 10 } );	// convert obj to formatted JSON
+						} else {					// otherwise ...
+							x = o2j( x );			// just convert obj to JSON
+						}
+					}
+					s += x;					// append to the growing string
+				}
+				if( isNode ) {
+					if( process.stdout.isTTY ) {
+						switch( ll ) {
+						case 1:
+							s = `${style.red.open}${s}${style.red.close}`;
+							break;
+						case 2:
+							s = `${style.yellow.open}${s}${style.yellow.close}`;
+							break;
+						case 3:
+							break;
+						case 4:
+							s = `${style.cyan.open}${s}${style.cyan.close}`;
+							break;
+						case 5:
+							s = `${style.magenta.open}${s}${style.magenta.close}`;
+							break;
+						}
+					}
+					process.stdout.write( s + "\n" );	// write string to stdout
+				} else {
+					switch( ll ) {
+					case 1: console.error( s ); break;
+					case 2: console.warning( s ); break;
+					default: console.log( s ); break;
+					}
+				}
+				return logFunc
+			}
+			f.E = function( s ) { f( 1, "******* " + s ); }    // error
+			f.W = function( s ) { f( 2, "- - - - " + s ); }    // warning
+			f.I = function( s ) { f( 3, s ); }                 // info
+			f.V = function( s ) { f( 4, s ); }                 // verbose
+			f.D = function( s ) { f( 5, s ); }                 // debug
+			return f;
+		}
+
+		const defLog = mkLog("")(3);
+		defLog.mkLog = mkLog;
+
+		M.log5 = defLog;
+
+	})();
+
+
 	if(isNode) {
 
 		// Node.js only stuff
@@ -756,7 +858,6 @@ IN THE SOFTWARE.
 
 
 		// Other modules
-		M.log5 = require( "log5" );	// XXX roll this in instead of require()ing it?
 		M.DS = require( "ds" ).DS;	// XXX roll this in instead of require()ing it?
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
 
