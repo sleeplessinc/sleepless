@@ -19,6 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
+
 (function() {
 
 	let M = {};
@@ -46,8 +47,8 @@ IN THE SOFTWARE.
 	// convert and return object as JSON or null if exception
 	M.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
-	// convert an arguments object to real array
 	// XXX DEPRECATE - or investigate ... suspect Firefox doesn't like this
+	// convert an arguments object to real array
 	M.args = function(a) { return Array.prototype.slice.call(a); } 
 
 	// convert whatever to float or 0 if not at all numberlike
@@ -596,7 +597,7 @@ IN THE SOFTWARE.
 
 
 	// Sort of like Markdown, but not really.
-	M.markup = function( t ) {
+	M.t2h = function( t ) {
 
 		// nuke CRs
 		t = t.replace(/\r/gi, "\n")
@@ -713,7 +714,7 @@ IN THE SOFTWARE.
 
 		return t;
 	};
-	M.t2h = M.markup;		// alternate name for markup
+	M.markup = M.markup;	// XXX Deprecate in favor of t2h
 
 
 	// The inimitable Log5 ...
@@ -809,17 +810,13 @@ IN THE SOFTWARE.
 			f.D = function( s ) { f( 5, s ); }                 // debug
 			return f;
 		}
-
 		const defLog = mkLog("")(3);
 		defLog.mkLog = mkLog;
-
 		M.log5 = defLog;
-
 	})();
 
 
 	if(isNode) {
-
 		// Node.js only stuff
 
 		// Read a file from disk
@@ -846,16 +843,6 @@ IN THE SOFTWARE.
 			h.update(s);
 			return h.digest("hex");
 		}
-
-		// Convert Ctr object into an event emitter (?)
-		M.EE = function( Ctr ) {
-			var EventEmitter = require("events");
-			require("util").inherits( Ctr, EventEmitter );
-			var o = new Ctr();
-			EventEmitter.call( o );
-			return o;
-		};
-
 
 		// DS (datastore)
 		// XXX Make a version of this for browser that uses localStorage or something?
@@ -900,11 +887,6 @@ IN THE SOFTWARE.
 			D.prototype = new F();
 			M.DS = D
 		})();
-
-
-		// Other modules
-		//M.db = require( "db" );	// need to remove dependency on old sleepless
-
 
 
 		// XXX Deprecate in favor of M.rpc() 
@@ -994,6 +976,7 @@ IN THE SOFTWARE.
 			req.end();
 		};
 
+
 		// XXX make a version of this for browser with identical signature
 		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false, _redirects = 0 ) {
 			if( _get ) {	// if using GET ...
@@ -1046,6 +1029,7 @@ IN THE SOFTWARE.
 
 		// This is a connect/express middleware that creates okay()/fail() functions on the response
 		// object for responding to an HTTP request with a JSON payload.
+		// XXX This may not really belong in sleepless.js
 		M.mw_fin_json = function( req, res, next ) {
 			res.done = ( error, data ) => {
 				let json = JSON.stringify( { error, data } );
@@ -1059,7 +1043,6 @@ IN THE SOFTWARE.
 		};
 
 	} else {
-
 		// Browser only stuff
 
 		M.LS = {
@@ -1117,7 +1100,7 @@ IN THE SOFTWARE.
 			xhr.send( M.o2j( data ) );
 		}
 
-
+		// XXX deprecate?  Not really used much, may not belong in sleepless.js
 		// Shows a browser notification if permission granted.
 		// Ask permission if user hasn't yet been asked and honor their choice thereafter.
 		// title = Title string to show in notice (name of app typically)
@@ -1161,13 +1144,6 @@ IN THE SOFTWARE.
 				}
 			}
 			return o
-		};
-
-		// Deprecate in favor of QS1("#id");
-		// Get an element by its id
-		// XXX Never liked this name of this thing.
-		M.getEl = function(id) {
-			return document.getElementById(id);
 		};
 
 		// Convert HTMLCollection to normal array
@@ -1264,6 +1240,13 @@ IN THE SOFTWARE.
 			return data;
 		};
 
+		// Deprecate in favor of QS1("#id");
+		// Get an element by its id
+		// XXX Never liked this name of this thing.
+		M.getEl = function(id) {
+			return document.getElementById(id);
+		};
+
 
 		// ---------------------------------------
 		// The world renowned rplc8()!
@@ -1288,9 +1271,9 @@ IN THE SOFTWARE.
 
 				// Inject into the attributes of the actual tag of the element.
 				// Do this slightly differently for IE because IE is stupid.
-				// XXX Do I still have to do this? Isn't IE dead yet?
 				let attrs = e.attributes;
 				if( navigator.appName == "Microsoft Internet Explorer" ) {
+					// XXX Do I still have to do this? Isn't IE dead yet?
 					for( let k in attrs ) {
 						let val = e.getAttribute( k );
 						if( val ) {
