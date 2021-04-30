@@ -796,7 +796,7 @@ IN THE SOFTWARE.
 				} else {
 					switch( ll ) {
 					case 1: console.error( s ); break;
-					case 2: console.warning( s ); break;
+					case 2: console.warn( s ); break;
 					default: console.log( s ); break;
 					}
 				}

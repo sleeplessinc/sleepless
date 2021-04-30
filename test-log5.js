@@ -24,5 +24,7 @@ test = function(logger) {
 test(log5);
 test(log5.mkLog("LOG5TEST "))
 
+log5( 1, { anobject: 7 } )
+
 
 
