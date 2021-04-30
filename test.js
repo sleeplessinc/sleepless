@@ -194,4 +194,13 @@ test = function(logger) {
 test(log5);
 test(log5.mkLog("LOG5TEST "))
 
+if( isNode ) {
+	let ds = new DS( "test.json" );
+	ds.bar = 7;
+	ds.save();
+	ds2 = new DS( "test.json" );
+	throwIf( ds2.bar !== 7 );
+}
+
+
 

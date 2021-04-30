@@ -857,9 +857,54 @@ IN THE SOFTWARE.
 		};
 
 
+		// DS (datastore)
+		// XXX Make a version of this for browser that uses localStorage or something?
+		(function() {
+			const fs = require( "fs" );
+			const load = function( f ) {
+				const self = this;
+				f = f || self.file;
+				self.__proto__.file = f;
+				try {
+					const ds = JSON.parse( fs.readFileSync( f ) );
+					for( let key in ds ) 
+						self[ key ] = ds[ key ];
+				} catch( e ) {
+					self.clear();
+				} 
+			}
+			// this may throw exception, but it's up to caller to deal with it.
+			const save = function( f ) {
+				const self = this;
+				f = f || self.file;
+				self.__proto__.file = f;
+				fs.writeFileSync( f, JSON.stringify( self ) );
+			}
+			const clear = function() {
+				const self = this;
+				for( let key in self ) 
+					delete self[ key ];
+			}
+			const ldsv = { load:load, save:save, clear:clear }
+			const F = function( file, opts ) {
+				var self = this;
+				self.file = file;
+				self.opts = opts || {};
+			}
+			F.prototype = ldsv;
+			const D = function( f, opts ) {
+				const self = this;
+				self.__proto__ = new F( "ds.json", opts );
+				self.load( f );
+			}
+			D.prototype = new F();
+			M.DS = D
+		})();
+
+
 		// Other modules
-		M.DS = require( "ds" ).DS;	// XXX roll this in instead of require()ing it?
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
+
 
 
 		// XXX Deprecate in favor of M.rpc() 
