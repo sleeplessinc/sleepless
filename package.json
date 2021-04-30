@@ -1,12 +1,9 @@
 {
 	"name": "sleepless",
-	"version": "3.12.0",
+	"version": "3.12.1",
 	"description": "Sleepless Software Inc. Javascript Library",
 	"author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
 	"repository": "git://github.com/sleeplessinc/sleepless.git",
 	"dependencies": {
-		"ds": "^1.4.2",
-		"hreq": "^1.0.1",
-		"log5": "^2.3.0"
 	}
 }
