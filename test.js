@@ -1,6 +1,9 @@
 
+let isBrowser = typeof global === "undefined";
+let isNode = ! isBrowser;
+
 var l = console.log
-require("./sleepless.js").globalize();
+require("./sleepless.js")
 
 o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
 j = JSON.stringify(o);
@@ -113,13 +116,15 @@ throwIf( "foo_bar".toLabel() !== "Foo Bar" );
 throwIf( "foo_bar".toLabel() !== "Foo Bar" );
 throwIf( "foo_bar!".toLabel() !== "Foo Bar!" );
 
-getFile("test.js", "utf8", function(err, data) {
-	throwIf( err, err );
-	throwIf( getFile("test.js").toString() !== data.toString() );
-});
+//getFile("test.js", "utf8", function(err, data) {
+//	throwIf( err, err );
+//	throwIf( getFile("test.js").toString() !== data.toString() );
+//});
 
-throwIf( sha1("I have a lovely bunch of coconuts.") !== "9fd0f467384256f02560d0694316b6d9bdfe7c68");
-throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d8871d53111e021483c12a3e1ccb8ec59b0d62f3167cb13");
+if( isNode ) {
+	throwIf( sha1("I have a lovely bunch of coconuts.") !== "9fd0f467384256f02560d0694316b6d9bdfe7c68");
+	throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d8871d53111e021483c12a3e1ccb8ec59b0d62f3167cb13");
+}
 
 throwIf( "I,\nhave a lovely bunch of coconuts.".looksLike("i have", "coconuts") !== true)
 
@@ -132,12 +137,15 @@ Thing = function() {
 	this.name = "Mr. Thing";
 }
 
-t = new EE(Thing);
-t.on("foo", function(n) {
-	throwIf(n != "Mr. Thing");
-})
-t.emit("foo", t.name);
+if( isNode ) {
+	t = new EE(Thing);
+	t.on("foo", function(n) {
+		throwIf(n != "Mr. Thing");
+	})
+	t.emit("foo", t.name);
+}
 
+/*
 get_json( "https://api.sleepless.com/v2/blog", {}, data => {
 	throwIf( typeof data !== "object" );
 
@@ -153,7 +161,15 @@ get_json( "https://api.sleepless.com/v2/blog", {}, data => {
 }, err => {
 	throw err;
 });
+*/
 
+if( isBrowser ) {
+	let o = { x: 3 };
+	let j = o2j( o );
+	LS.set( "foo", { x: 3 } );
+	throwIf( o2j( LS.get( "foo" ) ) != j );
+	LS.clear();
+}
 
 
 

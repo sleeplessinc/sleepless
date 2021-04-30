@@ -41,108 +41,125 @@
 	<tr>
 		<td>
 		<textarea id="plaintext">
-			Markup 
-			======
+Markup 
+======
 
-			Simple markup language parsed at run-time in the browser
-			--------------------------------------------------------
-			(cy) (xlink http://sleepless.com/blog/ Sleepless Inc.) -- All Rights Reserved
+Simple markup language parsed at run-time in the browser 
+--------------------------------------------------------
 
+(cy) (xlink http://sleepless.com Sleepless Inc.) -- All Rights Reserved
 
-			This is the first sentence of the first paragraph.
-			This is the second sentence of the first paragraph.
+This is the first sentence of the first paragraph.
+This is the second sentence of the first paragraph.
 
-			This is the second paragraph.  It also has two
-			sentences but the underlying markup
-			is written a little differently.
+This is the second paragraph.  Blank lines indicate
+paragraph boundaries.
 
-			Unordered list
-			--------------
+Unordered list
+--------------
 
-				- unordered list item
-				- unordered list item
+- unordered list item
+- unordered list item
 
-			Ordered list
-			------------
+Ordered list
+------------
 
-				# ordered list item 1
-				# ordered list item 2
-				# ordered list item 3
+# ordered list item 1
+# ordered list item 2
+# ordered list item 3
 
-			Image
-			-----
-			(image coffee.png Yum!)
+Image
+-----
 
-
-			Figure
-			-----
-
-			(figure coffee.png Yum!)
+(image coffee.png Yum!)
 
 
-			Links
-			-----
-			(link https://github.com/sleeplessinc/markup Click to get Markup!)
+Figure
+-----
 
-			(xlink https://github.com/sleeplessinc/markup Click to get Markup in a separate tab!)
-
-			Styles
-			------
-			**This is emphasized text** and __This is underlined text__
-
-			Symbols
-			------
-				- (tm)
-				- (r)
-				- (c)
-				- (cy)
-				- (cm A1 Widgets Ltd.)
-
-			Block quote
-			-----------
-				"
-				To be, or not to be.  That is the question!
-
-				Whether 'tis nobler to suffer the slings and arrows of outrageous fortune,
-				or to whatever ...
-				"
+(figure coffee.png Yum!)
 
 
-			Code
-			-----
-			Some {inline code} versus ...
+Links
+-----
 
-			{
-				// ... this, which is a block of code.
-				var x = 1;
-				var y = 9;
-			}
+(link https://github.com/sleeplessinc/markup Click to get Markup!)
 
-			Dashes
-			-----
-
-			Two hyphens make an n-dash, like "--"
-
-			Three hyphens make an m-dash, like "---"
-
-			Four dashes makes a horizontal rule like this ...
-			----
-
-			Five or more dashes makes an h2 heading out of the preceding line.
-			-----
-
-			Five or more equals signs makes an h1 heading out of the preceding line.
-			=====
+(xlink https://github.com/sleeplessinc/markup Click to get Markup in a separate tab!)
 
 
-			Special
-			-------
-			Only if used in browser code:
+Styles
+------
 
-				- Page last modified (lastModified)
+** Put double *'s around text to make it bold**.
+
+__ Put double _'s (underscores) around text to make it underline__.
+
+// Put double /'s around text to make it italic//.
 
 
-			That's it!
+Symbols
+------
+
+- (tm)
+- (r)
+- (c)
+- (cy)
+- (cm A1 Widgets Ltd.)
+
+Block quote
+-----------
+
+"
+To be, or not to be.  That is the question!
+
+Whether 'tis nobler to suffer the slings and arrows of outrageous fortune,
+or to whatever ...
+"
+
+
+Code
+-----
+Some {inline code} versus ...
+
+{
+	// ... this, which is a block of code.
+	var x = 1;
+	var y = 9;
+}
+
+Dashes
+-----
+
+Two hyphens make an n-dash, like "--"
+
+Three hyphens make an m-dash, like "---"
+
+Four hyphens on a line by itself makes a horizontal rule
+----
+
+Five or more equals signs makes an h1 heading out of the preceding non-blank line.
+=====
+
+Five or more hyphens makes an h2 heading out of the preceding non-blank line.
+-----
+
+Five or more hyphens+space pairs makes an h3 heading
+- - - - -
+
+Five or more hyphens+space+space triplets makes an h4 heading
+-  -  -  -  -
+
+
+Special
+-------
+
+Only if used in browser code:
+
+	- Page last modified (lastModified)
+
+
+That's it!
 		</textarea>
 		</td>
 		<td id="markedup"></td>

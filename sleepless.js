@@ -40,7 +40,7 @@ IN THE SOFTWARE.
 	// throw an error if a condition is true
 	M.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
 
-	// convert and return json as object or null if error
+	// convert and return json as object or null if exception
 	M.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 
 	// convert and return object as JSON or null if exception
@@ -50,12 +50,11 @@ IN THE SOFTWARE.
 	// XXX DEPRECATE - or investigate ... suspect Firefox doesn't like this
 	M.args = function(a) { return Array.prototype.slice.call(a); } 
 
-	// XXX Deprecate ... not really that useful
-	//M.eachVal = function(o, cb) { for(var k in o) { cb(o[k], k); } };
-
 	// convert whatever to float or 0 if not at all numberlike
 	// E.g. "123.9" --> 123.9, null --> 0.0, undefined --> 0.0, NaN --> 0.0, 123.9 --> 123.9
-	M.toFlt = function(v) { return parseFloat((""+v).replace(/[^-.0-9]/g, "")) || 0.0; }
+	M.toFlt = function(v) {
+		return parseFloat((""+v).replace(/[^-.0-9]/g, "")) || 0.0;
+	}
 
 	// convert whatever to integer or 0 if not at all numberlike
 	// E.g. "123" --> 123, null --> 0, undefined --> 0, NaN --> 0, 123 --> 123, -123.9 --> -124
@@ -74,7 +73,6 @@ IN THE SOFTWARE.
 	// convert dollars to pennies
 	// E.g.  1234.56 --> 123456
 	M.bucksToCents = function(bucks) {
-		// return Math.round( M.toFlt(bucks) * 100 ); --> can't use this; It breaks on #'s like 0.285 - )-:
 		return Math.round( (M.toFlt(bucks) * 1000) / 10 );
 	}
 	M.b2c = M.bucksToCents;
@@ -104,6 +102,7 @@ IN THE SOFTWARE.
 			(plcs ? dot + Math.abs(n - intPart).toFixed(plcs).slice(-plcs) : '');
 	}
 
+	// fraction to percent.
 	// convert something like 0.12 to a string that looks like "12" with
 	// optional alternate decimal and thousands-seperator chars
 	// NOTE: there is no "%" added, you have to do that yourself if you want it.
@@ -114,6 +113,7 @@ IN THE SOFTWARE.
 	}
 
 	// Convert whatever to a string that looks like "1,234.56"
+	// Add the $ symbol yourself.
 	// E.g. toMoney( 1234.56 )				// "1,234.56"
 	// E.g. toMoney( 1234.56, 1, ".", "" )	// "1.234,56"
 	M.toMoney = function(n, dot, sep) {
@@ -146,7 +146,7 @@ IN THE SOFTWARE.
 		return M.toInt( dt.getTime() / 1000 );
 	}
 
-	// convert "YYYY-MM-YY" or "YYYY-MM-YY HH:MM:SS" to Unix timestamp
+	// Convert "YYYY-MM-YY" or "YYYY-MM-YY HH:MM:SS" to Unix timestamp
 	M.my2ts = function(m) {
 		if( m.length == 10 && /\d\d\d\d-\d\d-\d\d/.test(m) ) {
 			m += " 00:00:00";
@@ -168,7 +168,7 @@ IN THE SOFTWARE.
 		return M.toInt(d.getTime() / 1000);
 	}
 
-	// convert Unix timestamp to "YYYY-MM-DD HH:MM:SS"
+	// Convert Unix timestamp to "YYYY-MM-DD HH:MM:SS"
 	M.ts2my = function(ts) {
 		var d = M.ts2dt(ts);
 		if(!d) {
@@ -190,8 +190,7 @@ IN THE SOFTWARE.
 	}
 
 	// Convert Unix timestamp to Date object
-	// Returns null if ts is falsey
-	// NOTE: One might expect M.ts2dt() to return a Date object for "now", but it actually returns null.
+	// Returns null (NOT a date object for "now" as you might expect) if ts is falsey.
 	M.ts2dt = function(ts) {
 		ts = M.toInt(ts);
 		return ts ? new Date(ts * 1000) : null;
@@ -325,6 +324,7 @@ IN THE SOFTWARE.
 
 
 	// return an array containing only distinct values.
+	// E.g.  [ 1,2,2 ].distinct()		// [1,2]
 	Array.prototype.distinct = function( cb ) {
 		let hash = {};
 		for( let el of this ) {
@@ -362,6 +362,7 @@ IN THE SOFTWARE.
 	// Returns true if the string begins with the prefix string
 	// E.g.	"Foobar".startsWith( "Foo" ) 		// true
 	// E.g.	"foobar".startsWith( "Foo" ) 		// false
+	// TODO: support regexp arg
 	if( String.prototype.startsWith === undefined ) {
 		String.prototype.startsWith = function(prefix) {
 			return this.substr(0, prefix.length) == prefix;
@@ -371,6 +372,7 @@ IN THE SOFTWARE.
 	// Returns true if the string ends with the suffix string
 	// E.g.	"Foobar".endsWith( "bar" ) 		// true
 	// E.g.	"foobar".endsWith( "Bar" ) 		// false
+	// TODO: support regexp arg
 	if( String.prototype.endsWith === undefined ) {
 		String.prototype.endsWith = function(suffix) {
 			return this.substr(-suffix.length) == suffix;
@@ -378,7 +380,7 @@ IN THE SOFTWARE.
 	}
 
 	// Abbreviate to 'l' chars with ellipses
-	// E.g. "CADAFAEL THE BATTLE-DECLINER".abbr(20)	// "CADAFAEL THE BAT ..."
+	// E.g. "Foo bar baz".abbr(6)  // "Fo ..."
 	String.prototype.abbr = function(l) {
 		l = M.toInt(l) || 5;
 		if(this.length <= l) {
@@ -407,27 +409,21 @@ IN THE SOFTWARE.
 	// "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
 	String.prototype.looksLike = function() {
 		var a = Array.prototype.slice.call(arguments);        // convert arguments to true array
-		var s = "_" + this.toLowerCase().toId() + "_"; //.split("_"); //toLowerCase();
+		var s = "_" + this.toId() + "_"; //.split("_"); //toLowerCase();
 		for(var i = 0; i < a.length; i++) {
-			var t = "_" + (a[i].toLowerCase().toId()) + "_";
+			var t = "_" + (a[i].toId()) + "_";
 			if(s.indexOf(t) == -1)
 				return false;
 		}
 		return true;
 	}
 
-	// Returns true if the string is a valid email address
+	// Returns true if the string looks like a valid email address
 	String.prototype.is_email = function() {
 		return /^[A-Za-z0-9_\+-]+(\.[A-Za-z0-9_\+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.([A-Za-z]{2,})$/.test(this);
 	}
 
-	// So I can use each() instead of forEach
-	// E.g. [ 1, 2, 3 ].each( n => { ... } );
-	// XXX Deprecated ... don't think it was ever used 
-	// Array.prototype.each = Array.prototype.forEach;
-
-
-	// Returns a human readable relative time description for a Unix timestmap.
+	// Returns a human readable relative time description for a Unix timestmap versus "now"
 	// E.M. agoStr( time() - 60 ) 	// "60 seconds ago"
 	// E.M. agoStr( time() - 63 ) 	// "1 minute ago"
 	// Pass a truthy value for argument 'no_suffix' to suppress the " ago" at the end
@@ -456,10 +452,8 @@ IN THE SOFTWARE.
 		return v + (no_suffix ? "" : " ago");
 	}
 
-
 	
 	/*
-	runp()
 	Run some functions in parallel, e.g:
 
 		runp()						// create a runner object
@@ -554,7 +548,6 @@ IN THE SOFTWARE.
 	}
 
 	/*
-	runq()
 	Run a queue of functions sequentially, e.g:
 		runq()
 		.add(function(cb, a) {
@@ -628,13 +621,11 @@ IN THE SOFTWARE.
 		// -  -  -  -  -
 		// Heading 5
 		// -   -   -   -   -
-		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s\s){4,}-\n/gi, "\n<h5>$1</h5>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s){4,}-\n/gi, "\n<h4>$1</h4>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s){4,}-\n/gi, "\n<h3>$1</h3>\n" );
 		t = t.replace(/\n([^\s\n][^\n]+)\n-{5,}\n/gi, "\n<h2>$1</h2>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s){4,}\n/gi, "\n<h3>$1</h3>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s){4,}\n/gi, "\n<h4>$1</h4>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s\s){4,}\n/gi, "\n<h5>$1</h5>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
 
 		// hyper link/anchor
 		// (link url)
@@ -660,9 +651,11 @@ IN THE SOFTWARE.
 
 		// styles
 		// __underline__
-		// **emphasis**
-		t = t.replace(/__(([^_]|_[^_])*)__/gi, "<u>$1</u>");		// underline
-		t = t.replace(/\*\*(([^\*]|\*[^\*])*)\*\*/gi, "<em>$1</em>");	// emphasis
+		// **bold**
+		// //italic//
+		t = t.replace(/\/\/(.*)\/\//gi, "<i>$1</i>");
+		t = t.replace(/\*\*(.*)\*\*/gi, "<b>$1</b>");
+		t = t.replace(/__(.*)__/gi, "<u>$1</u>");
 
 		// "
 		// block quote text
@@ -753,21 +746,22 @@ IN THE SOFTWARE.
 		}
 
 		// Convert Ctr object into an event emitter (?)
-		M.EE = function(Ctr) {
+		M.EE = function( Ctr ) {
 			var EventEmitter = require("events");
-			require("util").inherits(Ctr, EventEmitter);
+			require("util").inherits( Ctr, EventEmitter );
 			var o = new Ctr();
-			EventEmitter.call(o);
+			EventEmitter.call( o );
 			return o;
 		};
 
 
 		// Other modules
-		M.log5 = require( "log5" );
-		M.DS = require( "ds" ).DS;
+		M.log5 = require( "log5" );	// XXX roll this in instead of require()ing it?
+		M.DS = require( "ds" ).DS;	// XXX roll this in instead of require()ing it?
 		//M.db = require( "db" );	// need to remove dependency on old sleepless
 
 
+		// XXX Deprecate in favor of M.rpc() 
 		M.get_json = function( url, data, cb_okay, cb_fail, num_redirects ) {
 			let okay = cb_okay || function(){};
 			let fail = cb_fail || function(){};
@@ -814,6 +808,7 @@ IN THE SOFTWARE.
 		};
 
 
+		// XXX Deprecate in favor of M.rpc()
 		// post_json( { url: "...", data: { ... }, ... }, okay, fail )
 		// url is required 
 		M.post_json = function( options, cb_okay, cb_fail ) {
@@ -853,6 +848,56 @@ IN THE SOFTWARE.
 			req.end();
 		};
 
+		// XXX make a version of this for browser with identical signature
+		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false, _redirects = 0 ) {
+			if( _get ) {	// if using GET ...
+				// add the data to the URL as query args
+				let arr = [];
+				for( let k in data ) {
+					arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
+				}
+				if( arr.length > 0 ) {
+					url += "?" + arr.join( "&" );
+				}
+			}
+			// check for looping
+			_redirects = M.toInt( _redirects );
+			if( _redirects > 10 ) {
+				fail( "Too many redirects" ); // methinks we loopeth
+				return;
+			}
+			const method = _get ? "GET" : "POST";
+			let opts = {
+				method: method,
+				headers: {
+					"Content-Type": "application/json",	// will always send this, and ...
+					"Accept": "application/json",		// will accept this in response
+				}
+			};
+			let json = "";	// collected response
+			let req = require( "https" ).request( url, opts, res => {
+				res.setEncoding( "utf8" );
+				res.on( "data", chunk => { json += chunk; } );
+				res.on( "end", () => {
+					let { statusCode, headers } = res;
+					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
+						okay( M.j2o( json ), res );		// done!
+					} else {
+						if( statusCode >= 300 && statusCode < 400 ) {	// if it's a redirect ...
+							let url = headers[ "location" ] || headers[ "Location" ];	// get new url
+							M.rpc( url, okay, fail, _get, _redirects + 1 );	// recursively try the new location
+						} else {	// otherwise ...
+							fail( "HTTP Error "+statusCode, json, req );	// just give up.
+						}
+					}
+				});
+			});
+			req.on( "error", fail );
+			req.write( _get ? "" : o2j( data ) );
+			req.end();
+		}
+
+
 		// This is a connect/express middleware that creates okay()/fail() functions on the response
 		// object for responding to an HTTP request with a JSON payload.
 		M.mw_fin_json = function( req, res, next ) {
@@ -872,20 +917,22 @@ IN THE SOFTWARE.
 		// Browser only stuff
 
 		M.LS = {
-			// XXX Add autoconverstion to/from JSON for objects
 			// XXX Add ttl feature
-			get: function(k) {
+			get: function( k ) {
 				try {
-					return localStorage.getItem(k);
-				} catch(e) { }
+					return j2o( localStorage.getItem( k ) );
+				} catch( e ) { }
 				return null;
 			},
-			set: function(k, v) {
+			set: function( k, v ) {
 				try {
-					return localStorage.setItem(k, v);
-				} catch(e) { }
+					return localStorage.setItem( k, o2j( v ) );
+				} catch( e ) { }
 				return null;
 			},
+			clear: function() {
+				return localStorage.clear();
+			}
 		};
 
 		// Navigate to new url
@@ -902,7 +949,7 @@ IN THE SOFTWARE.
 			x.send();
 		};
 
-
+		// XXX Deprecate in favor of browser version of rpc();
 		M.postJSON = function( url, data, okay, fail ) {
 			let xhr = new XMLHttpRequest();
 			xhr.onload = function() {
@@ -951,6 +998,8 @@ IN THE SOFTWARE.
 						});
 					}
 				}
+			} else {
+				// alert()?
 			}
 		};
 
@@ -968,12 +1017,14 @@ IN THE SOFTWARE.
 			return o
 		};
 
+		// Deprecate in favor of QS1("#id");
 		// Get an element by its id
 		// XXX Never liked this name of this thing.
 		M.getEl = function(id) {
 			return document.getElementById(id);
 		};
 
+		// Convert HTMLCollection to normal array
 		HTMLCollection.prototype.toArray = function() {
 			let arr = [];
 			for(let i = 0; i < this.length; i++) {
@@ -982,6 +1033,7 @@ IN THE SOFTWARE.
 			return arr;
 		};
 
+		// Convert NodeList to normal array
 		NodeList.prototype.toArray = HTMLCollection.prototype.toArray;
 
 		// Add a class to an element
@@ -1010,10 +1062,12 @@ IN THE SOFTWARE.
 			return M.QS( qs )[ 0 ];
 		};
 
+		// Find all child elements matching query selector
 		HTMLElement.prototype.find = function( qs ) {
 			return this.querySelectorAll( qs ).toArray();
 		}
 
+		// Find first child element matching query selector
 		HTMLElement.prototype.find1 = function( qs ) {
 			return this.find( qs )[ 0 ];
 		}
@@ -1441,7 +1495,8 @@ IN THE SOFTWARE.
 
 	}
 
-
+	// Load an image asyncrhonously, scale it to a specific width/height, convert
+	// the image to a "data:" url, and return it via callback.
 	M.scale_data_image = function( image_data_url, new_width, new_height, cb ) {
 		let img = new Image();
 		img.onload = function() {
@@ -1457,12 +1512,14 @@ IN THE SOFTWARE.
 	}
 
 
-	// Make all the module properties global (not recommended)
-	M.globalize = function( what ) {
-		let g = isBrowser ? window : global;
-		for( let k in M ) {
-			g[ k ] = M[ k ];
-		}
+	// XXX Deprecated - leaving her for a while so stuff doesn't break
+	// Make all the module sleepless functions global
+	M.globalize = function() { }
+
+	// Tire of constantly calling this ... just globalizing everything
+	let g = isBrowser ? window : global;
+	for( let k in M ) {
+		g[ k ] = M[ k ];
 	}
 
 	if(isNode) {
@@ -1476,5 +1533,6 @@ IN THE SOFTWARE.
 		window.sleepless = M;
 
 	}
+
 
 })();
