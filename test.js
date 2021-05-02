@@ -121,11 +121,6 @@ throwIf( "foo_bar!".toLabel() !== "Foo Bar!" );
 //	throwIf( getFile("test.js").toString() !== data.toString() );
 //});
 
-if( isNode ) {
-	throwIf( sha1("I have a lovely bunch of coconuts.") !== "9fd0f467384256f02560d0694316b6d9bdfe7c68");
-	throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d8871d53111e021483c12a3e1ccb8ec59b0d62f3167cb13");
-}
-
 throwIf( "I,\nhave a lovely bunch of coconuts.".looksLike("i have", "coconuts") !== true)
 
 throwIf( "joe@sleepless.com".is_email() !== true );
@@ -137,31 +132,16 @@ Thing = function() {
 	this.name = "Mr. Thing";
 }
 
-if( isNode ) {
-	t = new EE(Thing);
-	t.on("foo", function(n) {
-		throwIf(n != "Mr. Thing");
-	})
-	t.emit("foo", t.name);
-}
-
-/*
-get_json( "https://api.sleepless.com/v2/blog", {}, data => {
-	throwIf( typeof data !== "object" );
-
-	post_json( {
-		url: "https://api.sleepless.com/v2/blog"
-	}, data => {
-		throwIf( typeof data !== "object" );
-		log("Okay.");
-	}, err => {
-		throw err;
-	});
-
-}, err => {
+rpc( "https://rpc.sleepless.com/rpc/", { api: "ping" }, function( data ) {
+	log( o2j( data ) );
+}, function(err) {
 	throw err;
 });
-*/
+
+if( isNode ) {
+	throwIf( sha1("I have a lovely bunch of coconuts.") !== "9fd0f467384256f02560d0694316b6d9bdfe7c68");
+	throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d8871d53111e021483c12a3e1ccb8ec59b0d62f3167cb13");
+}
 
 if( isBrowser ) {
 	let o = { x: 3 };

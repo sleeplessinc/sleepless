@@ -38,8 +38,10 @@ IN THE SOFTWARE.
 		return console.log(m);
 	}
 
+
 	// throw an error if a condition is true
 	M.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
+
 
 	// convert and return json as object or null if exception
 	M.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
@@ -47,9 +49,6 @@ IN THE SOFTWARE.
 	// convert and return object as JSON or null if exception
 	M.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
-	// XXX DEPRECATE - or investigate ... suspect Firefox doesn't like this
-	// convert an arguments object to real array
-	M.args = function(a) { return Array.prototype.slice.call(a); } 
 
 	// convert whatever to float or 0 if not at all numberlike
 	// E.g. "123.9" --> 123.9, null --> 0.0, undefined --> 0.0, NaN --> 0.0, 123.9 --> 123.9
@@ -64,6 +63,7 @@ IN THE SOFTWARE.
 		return Math[n < 0 ? 'ceil' : 'floor'](n);
 	};
 
+
 	// convert from pennies to dollars
 	// E.g.  123456 --> 1234.56
 	M.centsToBucks = function(cents) {
@@ -77,6 +77,7 @@ IN THE SOFTWARE.
 		return Math.round( (M.toFlt(bucks) * 1000) / 10 );
 	}
 	M.b2c = M.bucksToCents;
+
 
 	// format a number into a string with any # of decimal places,
 	// and optional alternative decimal & thousand-separation chars
@@ -113,6 +114,7 @@ IN THE SOFTWARE.
 		return M.numFmt(n * 100, plcs, dot, sep);
 	}
 
+
 	// Convert whatever to a string that looks like "1,234.56"
 	// Add the $ symbol yourself.
 	// E.g. toMoney( 1234.56 )				// "1,234.56"
@@ -120,6 +122,7 @@ IN THE SOFTWARE.
 	M.toMoney = function(n, dot, sep) {
 		return M.numFmt(n, 2, dot, sep);
 	}
+
 
 	// Returns a human readable string that describes 'n' as a number of bytes,
 	// e.g., "1 KB", "21.5 MB", etc.
@@ -141,11 +144,13 @@ IN THE SOFTWARE.
 		return M.numFmt(sz, 1) + " TB"
 	}
 
+
 	// Return a Unix timestamp for current time, or for a Date object if provided
 	M.time = function( dt ) {
 		if( ! dt ) dt = new Date();
 		return M.toInt( dt.getTime() / 1000 );
 	}
+
 
 	// Convert "YYYY-MM-YY" or "YYYY-MM-YY HH:MM:SS" to Unix timestamp
 	M.my2ts = function(m) {
@@ -423,6 +428,11 @@ IN THE SOFTWARE.
 	String.prototype.is_email = function() {
 		return /^[A-Za-z0-9_\+-]+(\.[A-Za-z0-9_\+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.([A-Za-z]{2,})$/.test(this);
 	}
+
+	// Create this:
+	//String.prototype.is_url = function() {
+	//}
+
 
 	// Returns a human readable relative time description for a Unix timestmap versus "now"
 	// E.M. agoStr( time() - 60 ) 	// "60 seconds ago"
@@ -714,7 +724,6 @@ IN THE SOFTWARE.
 
 		return t;
 	};
-	M.markup = M.markup;	// XXX Deprecate in favor of t2h
 
 
 	// The inimitable Log5 ...
@@ -828,24 +837,23 @@ IN THE SOFTWARE.
 				return fs.readFileSync(path, enc);
 			}
 			fs.readFile(path, enc, cb);
-		}
+		};
 
 		// Return ASCII sha1 for a string
 		M.sha1 = function(s) {
 			var h = require("crypto").createHash("sha1");
 			h.update(s);
 			return h.digest("hex");
-		}
+		};
 
 		// Return ASCII sha256 for a string
 		M.sha256 = function(s) {
 			var h = require("crypto").createHash("sha256");
 			h.update(s);
 			return h.digest("hex");
-		}
+		};
 
 		// DS (datastore)
-		// XXX Make a version of this for browser that uses localStorage or something?
 		(function() {
 			const fs = require( "fs" );
 			const load = function( f ) {
@@ -889,95 +897,6 @@ IN THE SOFTWARE.
 		})();
 
 
-		// XXX Deprecate in favor of M.rpc() 
-		M.get_json = function( url, data, cb_okay, cb_fail, num_redirects ) {
-			let okay = cb_okay || function(){};
-			let fail = cb_fail || function(){};
-			let arr = [];
-			for( let k in data ) {
-				arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
-			}
-			if( arr.length > 0 ) {
-				url += "?" + arr.join( "&" );
-			}
-			num_redirects = M.toInt( num_redirects );
-			if( num_redirects > 5 ) {
-				fail( "Too many redirects" ); // we appear to be looping
-				return;
-			}
-			let opts = {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",	// will always send this, and ...
-					"Accept": "application/json",		// will accept this in response
-				}
-			};
-			let json = "";	// collected response
-			let req = require( "https" ).request( url, opts, res => {
-				res.setEncoding( "utf8" );
-				res.on( "data", chunk => { json += chunk; } );
-				res.on( "end", () => {
-					let { statusCode, headers } = res;
-					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
-						okay( M.j2o( json ), res );		// done!
-					} else {
-						if( statusCode >= 300 && statusCode < 400 ) {	// if it's a redirect ...
-							let url = headers[ "location" ] || headers[ "Location" ];
-							get_json( url, okay, fail, num_redirects + 1 );	// recursively try the new location
-						} else {	// otherwise ...
-							fail( "HTTP Error "+statusCode, json, req );	// just give up.
-						}
-					}
-				});
-			});
-			req.on( "error", fail );
-			req.write("");
-			req.end();
-		};
-
-
-		// XXX Deprecate in favor of M.rpc()
-		// post_json( { url: "...", data: { ... }, ... }, okay, fail )
-		// url is required 
-		M.post_json = function( options, cb_okay, cb_fail ) {
-			let opts = M.j2o( M.o2j( options ) );	// clone it so I'm modifying my own copy
-			let okay = cb_okay || function(){};
-			let fail = cb_fail || function(){};
-			opts.method = "POST";
-			opts.headers = {
-				"Content-Type": "application/json",	// will always send this, and ...
-				"Accept": "application/json",		// will accept this in response
-			}
-			let json = "";	// collected response
-			let req = require( "https" ).request( opts.url, opts, res => {
-				res.setEncoding( "utf8" );
-				res.on( "data", chunk => { json += chunk; } );
-				res.on( "end", () => {
-					let { statusCode, headers } = res;
-					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
-						okay( M.j2o( json ), res );
-					} else {
-						if( statusCode >= 300  && statusCode < 400 ) {	// if it's a redirect ...
-							opts.redirects = toInt( opts.redirects ) + 1;
-							if( opts.redirects > 10 ) {	// if we appear to be looping endlessly ...
-								fail( "TOO MANY REDIRECTS", res );
-							} else {	// otherwise ...
-								opts.url = headers[ "location" ] || headers[ "Location" ];
-								M.post_json( opts, okay, fail );	// try the new location
-							}
-						} else {	// otherwise ...
-							fail( "HTTP ERROR "+statusCode, json, req );	// just give up.
-						}
-					}
-				});
-			});
-			req.on( "error", fail );
-			req.write( M.o2j( opts.data || {} ) );
-			req.end();
-		};
-
-
-		// XXX make a version of this for browser with identical signature
 		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false, _redirects = 0 ) {
 			if( _get ) {	// if using GET ...
 				// add the data to the URL as query args
@@ -1024,7 +943,7 @@ IN THE SOFTWARE.
 			req.on( "error", fail );
 			req.write( _get ? "" : o2j( data ) );
 			req.end();
-		}
+		};
 
 
 		// This is a connect/express middleware that creates okay()/fail() functions on the response
@@ -1065,10 +984,11 @@ IN THE SOFTWARE.
 		};
 
 		// Navigate to new url
-		M.jmp = function(url) { document.location = url; }
+		M.jmp = function(url) { document.location = url; };
 
 		// Reload current page
-		M.reload = function() { document.location.reload(); }
+		M.reload = function() { document.location.reload(); };
+
 
 		// Make an async HTTP GET request for a URL
 		M.getFile = function(url, cb) {
@@ -1078,13 +998,23 @@ IN THE SOFTWARE.
 			x.send();
 		};
 
-		// XXX Deprecate in favor of browser version of rpc();
-		M.postJSON = function( url, data, okay, fail ) {
+		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false ) {
+			if( _get ) {	// if using GET ...
+				// add the data to the URL as query args
+				let arr = [];
+				for( let k in data ) {
+					arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
+				}
+				if( arr.length > 0 ) {
+					url += "?" + arr.join( "&" );
+				}
+			}
+			const method = _get ? "GET" : "POST";
 			let xhr = new XMLHttpRequest();
 			xhr.onload = function() {
 				let r = M.j2o( xhr.responseText );
 				if( ! r ) {
-					fail( "Error processing response from server." );
+					fail( "Error parsing response from server." );
 					return;
 				}
 				if( r.error ) {
@@ -1094,43 +1024,16 @@ IN THE SOFTWARE.
 				okay( r.data, xhr );
 			};
 			xhr.onerror = fail;
-			xhr.open( "POST", url );
+			xhr.open( method, url );
 			xhr.setRequestHeader( "Content-Type", "application/json" );
 			xhr.setRequestHeader( "Accept", "application/json" );
-			xhr.send( M.o2j( data ) );
-		}
-
-		// XXX deprecate?  Not really used much, may not belong in sleepless.js
-		// Shows a browser notification if permission granted.
-		// Ask permission if user hasn't yet been asked and honor their choice thereafter.
-		// title = Title string to show in notice (name of app typically)
-		// text = String message to display.
-		// icon = String path to graphic 
-		// onclick = function to call if notification is clicked
-		M.showNotification = function(title, text, icon, onclick) {
-			if("Notification" in window) {
-				let do_notice = function() {
-					let n = new Notification(title, {body: text, icon:icon});
-					if(onclick) {
-						n.addEventListener("click", onclick);
-					}
-				};
-				if(Notification.permission === "granted") {
-					do_notice();
-				}
-				else {
-					if(Notification.permission !== "denied") {
-						Notification.requestPermission(function(permission) {
-							if(Notification.permission === "granted") {
-								do_notice();
-							}
-						});
-					}
-				}
+			if( method == "POST" && data ) {
+				xhr.send( M.o2j( data ) );
 			} else {
-				// alert()?
+				xhr.send();
 			}
 		};
+
 
 		// Returns an object constructed from the current page's query args.
 		M.getQueryData = function() {
@@ -1145,6 +1048,7 @@ IN THE SOFTWARE.
 			}
 			return o
 		};
+
 
 		// Convert HTMLCollection to normal array
 		HTMLCollection.prototype.toArray = function() {
@@ -1238,13 +1142,6 @@ IN THE SOFTWARE.
 				}
 			}
 			return data;
-		};
-
-		// Deprecate in favor of QS1("#id");
-		// Get an element by its id
-		// XXX Never liked this name of this thing.
-		M.getEl = function(id) {
-			return document.getElementById(id);
 		};
 
 
@@ -1432,23 +1329,23 @@ IN THE SOFTWARE.
 
 			if(!data) {
 				// no data object passed in use current query data 
-				var data = {}		// XXX hoisting??
-				var a = document.location.search.split(/[?&]/)
-				a.shift()
+				data = {};
+				var a = document.location.search.split(/[?&]/);
+				a.shift();
 				a.forEach(function(kv) {
-					var p = kv.split("=")
-					data[p[0]] = (p.length > 1) ? decodeURIComponent(p[1]) : ""
+					var p = kv.split("=");
+					data[p[0]] = (p.length > 1) ? decodeURIComponent(p[1]) : "";
 				})
 			}
 
-			var state = { pageYOffset: 0, data: data }
+			var state = { pageYOffset: 0, data: data };
 
 			// build URL + query-string from current path and contents of 'data'
-			var qs = ""
+			var qs = "";
 			for(var k in data) {
-				qs += (qs ? "&" : "?") + k + "=" + encodeURIComponent(data[k])
+				qs += (qs ? "&" : "?") + k + "=" + encodeURIComponent(data[k]);
 			}
-			var url = document.location.pathname + qs
+			var url = document.location.pathname + qs;
 
 			// if browser doesn't support pushstate, just redirect to the url
 			if(history.pushState === undefined) {
@@ -1468,20 +1365,20 @@ IN THE SOFTWARE.
 							pages[ i ].style.display = "none";
 						}
 						// jump to top of document
-						document.body.scrollIntoView()
+						document.body.scrollIntoView();
 						// show the new page
-						var p = document.getElementById( "page_"+data.page ).style.display = "inherit"
+						var p = document.getElementById( "page_"+data.page ).style.display = "inherit";
 					}
 				}
 
 				if(history.replaceState !== undefined) {
 					// set state for the current/initial location
-					history.replaceState(state, "", url)
+					history.replaceState(state, "", url);
 					// wire in the pop handler
 					window.onpopstate = function(evt) {
 						if(evt.state) {
-							var data = evt.state
-							Nav.current_show(evt.state.data)
+							var data = evt.state;
+							Nav.current_show(evt.state.data);
 						}
 					}
 				}
@@ -1494,11 +1391,11 @@ IN THE SOFTWARE.
 
 			// if new show func supplied, start using that one
 			if(new_show) {
-				Nav.current_show = new_show
+				Nav.current_show = new_show;
 			}
 
-			Nav.current_show(data)
-		}
+			Nav.current_show(data);
+		};
 
 
 		// Ties a Javascript object to some user interface elements in the browser DOM.
@@ -1622,28 +1519,25 @@ IN THE SOFTWARE.
 			
 		})();
 
+
+		// Load an image asyncrhonously, scale it to a specific width/height, convert
+		// the image to a "data:" url, and return it via callback.
+		M.scale_data_image = function( image_data_url, new_width, new_height, cb ) {
+			let img = new Image();
+			img.onload = function() {
+				let cnv = document.createElement( "canvas" );
+				cnv.width = new_width;
+				cnv.height = new_height;
+				var ctx = cnv.getContext("2d");
+				ctx.drawImage(img, 0, 0, new_width, new_height);
+				let new_data_url = cnv.toDataURL( "image/jpeg", 0.5 );
+				cb( new_data_url );
+			}
+			img.src = image_data_url;
+		};
+
 	}
 
-	// Load an image asyncrhonously, scale it to a specific width/height, convert
-	// the image to a "data:" url, and return it via callback.
-	M.scale_data_image = function( image_data_url, new_width, new_height, cb ) {
-		let img = new Image();
-		img.onload = function() {
-			let cnv = document.createElement( "canvas" );
-			cnv.width = new_width;
-			cnv.height = new_height;
-			var ctx = cnv.getContext("2d");
-			ctx.drawImage(img, 0, 0, new_width, new_height);
-			let new_data_url = cnv.toDataURL( "image/jpeg", 0.5 );
-			cb( new_data_url );
-		}
-		img.src = image_data_url;
-	}
-
-
-	// XXX Deprecated - leaving her for a while so stuff doesn't break
-	// Make all the module sleepless functions global
-	M.globalize = function() { }
 
 	// Tire of constantly calling this ... just globalizing everything
 	let g = isBrowser ? window : global;
@@ -1652,15 +1546,9 @@ IN THE SOFTWARE.
 	}
 
 	if(isNode) {
-
 		module.exports = M;
-
 	} else {
-
-		// XXX can't combine other modules in browser unless we adopt the browser import/module stuff
-
 		window.sleepless = M;
-
 	}
 
 
