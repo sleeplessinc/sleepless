@@ -618,26 +618,6 @@ IN THE SOFTWARE.
 		// append/prepend a couple newlines so that regexps below will match at beginning and end
 		t = "\n\n" + t + "\n\n";		// note: will cause a <p> to always appear at start of output
 
-		// one or more blank lines mark a paragraph
-		t = t.replace(/\n\n+/gi, "\n\n<p>\n");
-		
-		// headings h1 and h2
-		// Heading 1
-		// =========
-		// Heading 2
-		// ---------
-		// Heading 3
-		// - - - - -
-		// Heading 4
-		// -  -  -  -  -
-		// Heading 5
-		// -   -   -   -   -
-		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s\s){4,}-\n/gi, "\n<h5>$1</h5>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s){4,}-\n/gi, "\n<h4>$1</h4>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s){4,}-\n/gi, "\n<h3>$1</h3>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n-{5,}\n/gi, "\n<h2>$1</h2>\n" );
-		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
-
 		// hyper link/anchor
 		// (link url)
 		// (link url alt_display_text)
@@ -660,6 +640,38 @@ IN THE SOFTWARE.
 		t = t.replace(/\(\s*figure\s+([^\s\)]+)\s*\)/gi, "(figure $1 $1)");
 		t = t.replace(/\(\s*figure\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<figure><img src=\"$1\" title=\"$2\"><figcaption>$2</figcaption></figure>");
 
+		// symbols
+		// (tm)	
+		// (r)
+		// (c)
+		// (cy)				"(C) 2021"
+		// (cm Foocorp)		"(C) 2021 Foocorp All Rights Reserved"
+		t = t.replace(/\(tm\)/gi, "&trade;");	
+		t = t.replace(/\(r\)/gi, "&reg;");	
+		t = t.replace(/\(c\)/gi, "&copy;");
+		t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
+		t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
+
+		// one or more blank lines mark a paragraph
+		t = t.replace(/\n\n+/gi, "\n\n<p>\n");
+		
+		// headings h1 and h2
+		// Heading 1
+		// =========
+		// Heading 2
+		// ---------
+		// Heading 3
+		// - - - - -
+		// Heading 4
+		// -  -  -  -  -
+		// Heading 5
+		// -   -   -   -   -
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s\s){4,}-\n/gi, "\n<h5>$1</h5>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s\s){4,}-\n/gi, "\n<h4>$1</h4>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n(-\s){4,}-\n/gi, "\n<h3>$1</h3>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n-{5,}\n/gi, "\n<h2>$1</h2>\n" );
+		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
+
 		// styles
 		// __underline__
 		// **bold**
@@ -679,18 +691,6 @@ IN THE SOFTWARE.
 		// foo { code } bar
 		t = t.replace(/\n\s*{\s*\n([^"]+)}\s*\n/gi, "\n<blockquote><code>$1</code></blockquote>\n");
 		t = t.replace(/{([^}]+)}/gi, "<code>$1</code>");	// code
-
-		// symbols
-		// (tm)	
-		// (r)
-		// (c)
-		// (cy)				"(C) 2021"
-		// (cm Foocorp)		"(C) 2021 Foocorp All Rights Reserved"
-		t = t.replace(/\(tm\)/gi, "&trade;");	
-		t = t.replace(/\(r\)/gi, "&reg;");	
-		t = t.replace(/\(c\)/gi, "&copy;");
-		t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
-		t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
 
 		// Unordered list
 		// - item 
