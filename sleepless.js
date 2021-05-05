@@ -621,18 +621,18 @@ IN THE SOFTWARE.
 		// hyper link/anchor
 		// (link url)
 		// (link url alt_display_text)
-		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*\)/gi, "(link $1 $1)");
+		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*\)/gi, "<a href=\"$1\">$1</a>");
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a href=\"$1\">$2</a>");
 
 		// hyper link/anchor that opens in new window/tab
 		// (xlink url)
 		// (xlink url alt_display_text)
-		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*\)/gi, "(xlink $1 $1)");
+		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*\)/gi, "<a target=_blank href=\"$1\">$1</a>");
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a target=_blank href=\"$1\">$2</a>");
 
 		// image
 		// (image src title)
-		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*\)/gi, "(image $1 $1)");
+		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*\)/gi, "<img src=\"$1\">");
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<img src=\"$1\" title=\"$2\">");
 
 		// figure
@@ -673,10 +673,10 @@ IN THE SOFTWARE.
 		t = t.replace(/\n([^\s\n][^\n]+)\n={5,}\n/gi, "\n<h1>$1</h1>\n" );
 
 		// styles
-		// __underline__
-		// **bold**
 		// //italic//
-		t = t.replace(/\/\/(.*)\/\//gi, "<i>$1</i>");
+		// **bold**
+		// __underline__
+		t = t.replace(/([^:])\/\/(.*)\/\//gi, "$1<i>$2</i>");
 		t = t.replace(/\*\*(.*)\*\*/gi, "<b>$1</b>");
 		t = t.replace(/__(.*)__/gi, "<u>$1</u>");
 
@@ -684,6 +684,16 @@ IN THE SOFTWARE.
 		// block quote text
 		// "
 		t = t.replace(/\n\s*"\s*\n([^"]+)"\s*\n/gi, "\n<blockquote>$1</blockquote>\n");	// blockquote
+
+		// >
+		// centered text
+		// >
+		t = t.replace(/\n\s*>\s*\n([^>]+)>\s*\n/gi, "\n<div style='text-align:center;'>$1</div>\n");
+
+		// >>
+		// right justified text
+		// >>
+		t = t.replace(/\n\s*>>\s*\n([^>]+)>>\s*\n/gi, "\n<div style='text-align:right'>$1</div>\n");
 
 		// {
 		// code
