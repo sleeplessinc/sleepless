@@ -1536,6 +1536,9 @@ IN THE SOFTWARE.
 			img.src = image_data_url;
 		};
 
+
+		M.globalize = function(){};
+
 	}
 
 
