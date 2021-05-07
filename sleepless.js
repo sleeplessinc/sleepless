@@ -33,7 +33,7 @@ IN THE SOFTWARE.
 			return;		// console doesn't exist in IE unless in debug mode
 		}
 		if(typeof m === "object") {
-			m = M.o2j(m);
+			return console.dir( m );
 		}
 		return console.log(m);
 	}
