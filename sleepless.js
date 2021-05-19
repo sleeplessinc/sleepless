@@ -1154,6 +1154,29 @@ IN THE SOFTWARE.
 			return data;
 		};
 
+		// Takes an object, copies values into matching named form fields,
+		// then sets onchange handlers that update the object values.
+		HTMLFormElement.prototype.setData = function( d ) {
+			for( let e of this.elements ) {
+				let k = e.name;
+				if( d[ k ] !== undefined ) {
+					let v = d[ k ];
+					if( e.type == "checkbox" )
+						e.checked = !! v;
+					else
+						e.value = v;
+					e.onchange = evt => {
+						let v = e.value;
+						if( e.type == "checkbox" )
+							v = !! v;
+						d[ k ] = v;
+					};
+				}
+			}
+		};
+
+
+
 
 		// ---------------------------------------
 		// The world renowned rplc8()!
