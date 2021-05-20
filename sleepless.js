@@ -1168,7 +1168,7 @@ IN THE SOFTWARE.
 					e.onchange = evt => {
 						let v = e.value;
 						if( e.type == "checkbox" )
-							v = !! v;
+							v = !! e.checked;
 						d[ k ] = v;
 					};
 				}
