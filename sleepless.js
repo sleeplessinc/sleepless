@@ -1156,7 +1156,7 @@ IN THE SOFTWARE.
 
 		// Takes an object, copies values into matching named form fields,
 		// then sets onchange handlers that update the object values.
-		HTMLFormElement.prototype.setData = function( d ) {
+		HTMLFormElement.prototype.setData = function( d, change_cb ) {
 			for( let e of this.elements ) {
 				let k = e.name;
 				if( d[ k ] !== undefined ) {
@@ -1170,6 +1170,8 @@ IN THE SOFTWARE.
 						if( e.type == "checkbox" )
 							v = !! e.checked;
 						d[ k ] = v;
+						if( change_cb )
+							change_cb( evt );
 					};
 				}
 			}
