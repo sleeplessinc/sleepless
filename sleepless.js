@@ -1243,7 +1243,7 @@ IN THE SOFTWARE.
 					}
 					let coll = document.querySelectorAll( elem );
 					if( coll.length !== 1 ) {
-						throw new Error( "rplc8: selector \""+elem+"\" doesn't match exactly 1 element" );
+						throw new Error( "rplc8: selector \""+elem+"\" matches "+coll.length+" elements" );
 					}
 					elem = coll[ 0 ];
 				}
