@@ -836,6 +836,7 @@ IN THE SOFTWARE.
 		const defLog = mkLog("")(3);
 		defLog.mkLog = mkLog;
 		M.log5 = defLog;
+		M.L = defLog;
 	})();
 
 
