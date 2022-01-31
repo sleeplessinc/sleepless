@@ -1552,10 +1552,22 @@ IN THE SOFTWARE.
 				reader.readAsDataURL(f);
 			};
 
+			let put_file = function( file, url, okay, fail ) {
+				let xhr = new XMLHttpRequest();
+				xhr.onload = function() {
+					okay( xhr );
+				}
+				xhr.upload.addEventListener("error", fail );
+				xhr.open( "PUT", url, true );
+				xhr.setRequestHeader( "Content-Type", file.type );
+				xhr.send( file );
+			};
+
 			M.FDrop = {
-				attach: attach,
-				mk_data_url: mk_data_url,
-			}
+				attach,
+				mk_data_url,
+				put,
+			};
 			
 		})();
 
