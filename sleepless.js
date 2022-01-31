@@ -1566,7 +1566,7 @@ IN THE SOFTWARE.
 			M.FDrop = {
 				attach,
 				mk_data_url,
-				put,
+				put_file,
 			};
 			
 		})();
