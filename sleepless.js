@@ -746,7 +746,7 @@ IN THE SOFTWARE.
 		var style = null;
 		if( isNode ) {
 			util = require( "util" );
-			style = require( "./ansi-styles.js" );
+			// style = require( "./ansi-styles.js" );
 		}
 		const n0 = function(n) {
 			if(n >= 0 && n < 10)
@@ -797,7 +797,7 @@ IN THE SOFTWARE.
 					}
 					s += x;					// append to the growing string
 				}
-				if( isNode ) {
+				if( isNode && style ) {
 					if( process.stdout.isTTY ) {
 						switch( ll ) {
 						case 1:
