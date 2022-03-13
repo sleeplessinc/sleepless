@@ -617,7 +617,7 @@ IN THE SOFTWARE.
 		t = t.replace(/\r/gi, "\n")
 
 		// remove leading/trailing whitespace on all lines
-		t = t.split( /\n/ ).map( l => l.trim() ).join( "\n" );
+		// t = t.split( /\n/ ).map( l => l.trim() ).join( "\n" );
 
 		// append/prepend a couple newlines so that regexps below will match at beginning and end
 		t = "\n\n" + t + "\n\n";		// note: will cause a <p> to always appear at start of output
@@ -699,12 +699,13 @@ IN THE SOFTWARE.
 		// >>
 		t = t.replace(/\n\s*>>\s*\n([^>]+)>>\s*\n/gi, "\n<div style='text-align:right'>$1</div>\n");
 
-		// {
-		// code
-		// }
-		// foo { code } bar
-		t = t.replace(/\n\s*{\s*\n([^"]+)}\s*\n/gi, "\n<blockquote><code>$1</code></blockquote>\n");
-		t = t.replace(/{([^}]+)}/gi, "<code>$1</code>");	// code
+		// {{
+		//     code block
+		// }}
+		// foo {inline code} bar
+		t = t.split( "{{\n" ).join( "<pre><code>" );	// code block
+		t = t.split( "}}\n" ).join( "</code></pre>" );
+		t = t.replace(/{([^}]+)}/gi, "<code>$1</code>");	// inline code
 
 		// Unordered list
 		// - item 
