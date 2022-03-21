@@ -1440,14 +1440,15 @@ IN THE SOFTWARE.
 
 
 		// Ties a Javascript object to some user interface elements in the browser DOM.
-		M.MXU = function( base, data ) {
+		// If anything changes in the data object then mod_cb is called.
+		M.MXU = function( base, data, mod_cb ) {
 
 			const form_types = "input select textarea".toUpperCase().split( " " );
 
 			let named_element = function( name ) {
 				return base.querySelector( "[name="+name+"]" );
 			}
-			
+
 			let proxy = new Proxy( data, {
 
 				get: function( tgt, prop ) {
@@ -1485,6 +1486,9 @@ IN THE SOFTWARE.
 						else {
 							e.innerHTML = v;
 						}
+					}
+					if( mod_cb ) {
+						mod_cb( prop, v );
 					}
 				},
 
