@@ -1356,6 +1356,8 @@ IN THE SOFTWARE.
 				return obj;
 			};
 
+			M.rplc8.inject = inject;
+
 		})();
 
 
