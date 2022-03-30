@@ -934,10 +934,12 @@ IN THE SOFTWARE.
 			let opts = {
 				method: method,
 				headers: {
-					"Content-Type": "application/json",	// will always send this, and ...
+					//"Content-Type": "application/json",	// will always send this, and ...
 					"Accept": "application/json",		// will accept this in response
 				}
 			};
+			if( method != "GET" )
+				opts.headers[ "Content-Type" ] = "application/json";
 			let json = "";	// collected response
 			let req = require( "https" ).request( url, opts, res => {
 				res.setEncoding( "utf8" );
@@ -1041,7 +1043,8 @@ IN THE SOFTWARE.
 			};
 			xhr.onerror = fail;
 			xhr.open( method, url );
-			xhr.setRequestHeader( "Content-Type", "application/json" );
+			if( method != "GET" )
+				xhr.setRequestHeader( "Content-Type", "application/json" );
 			xhr.setRequestHeader( "Accept", "application/json" );
 			if( method == "POST" && data ) {
 				xhr.send( M.o2j( data ) );
