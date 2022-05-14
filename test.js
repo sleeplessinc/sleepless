@@ -144,11 +144,21 @@ if( isNode ) {
 }
 
 if( isBrowser ) {
+
 	let o = { x: 3 };
 	let j = o2j( o );
 	LS.set( "foo", { x: 3 } );
 	throwIf( o2j( LS.get( "foo" ) ) != j );
 	LS.clear();
+
+	let tpl = QS1( "#r8" );
+	throwIf( ! tpl );
+	let r8 = rplc8( tpl );
+	r8.update( [
+		{ foo: "rplc8 foo #1" },
+		{ foo: "rplc8 foo #2" },
+	]);
+
 }
 
 test = function(logger) {

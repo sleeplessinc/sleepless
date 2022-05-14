@@ -428,6 +428,17 @@ IN THE SOFTWARE.
 		return true;
 	}
 
+	// Replaces instances of "__key__" in string s,
+	// with the values from corresponding key in data.
+	String.prototype.substitute = function( data ) {
+		let s = this;
+		for( let key in data ) {
+			let re = new RegExp( "__" + key + "__", "g" );
+			s = s.replace( re, "" + data[ key ] );
+		}
+		return s;
+	}
+
 	// Returns true if the string looks like a valid email address
 	String.prototype.is_email = function() {
 		return /^[A-Za-z0-9_\+-]+(\.[A-Za-z0-9_\+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.([A-Za-z]{2,})$/.test(this);
@@ -1150,6 +1161,30 @@ IN THE SOFTWARE.
 			}
 		};
 
+		// Injects data values into a single DOM element
+		HTMLElement.prototype.inject = function( data ) {
+			let e = this;
+
+			// Inject into the body of the element
+			e.innerHTML = e.innerHTML.substitute( data );
+
+			// Inject into the attributes of the actual tag of the element.
+			let attrs = e.attributes;
+			for( let i = 0 ; i < attrs.length ; i++ ) {
+				let attr = attrs[ i ];
+				let val = attr.value;
+				if( val ) {
+					if( typeof val === "string" ) {
+						if( val.match( /__/ ) ) {
+							attr.value = val.substitute( data );
+						}
+					}
+				}
+			}
+			return e;
+		}
+
+
 		// handy thing to grab the data out of a form
 		HTMLFormElement.prototype.getData = function() {
 			const types = "input select textarea".toUpperCase().split( " " );
@@ -1197,49 +1232,12 @@ IN THE SOFTWARE.
 			// Replaces instances of "__key__" in string s,
 			// with the values from corresponding key in data.
 			let substitute = function( s, data ) {
-				for( let key in data ) {
-					let re = new RegExp( "__" + key + "__", "g" );
-					s = s.replace( re, ""+(data[ key ]) );
-				}
-				return s;
+				return s.substitute( data );
 			}
 
 			// Injects data values into a single DOM element
 			let inject = function( e, data ) {
-
-				// Inject into the body of the element
-				e.innerHTML = substitute( e.innerHTML, data );
-
-				// Inject into the attributes of the actual tag of the element.
-				// Do this slightly differently for IE because IE is stupid.
-				let attrs = e.attributes;
-				if( navigator.appName == "Microsoft Internet Explorer" ) {
-					// XXX Do I still have to do this? Isn't IE dead yet?
-					for( let k in attrs ) {
-						let val = e.getAttribute( k );
-						if( val ) {
-							if( typeof val === "string" ) {
-								if( val.match( /__/ ) ) {
-									val = substitute( val, data );
-									e.setAttribute( k, val );
-								}
-							}
-						}
-					}
-				}
-				else {
-					for( let i = 0 ; i < attrs.length ; i++ ) {
-						let attr = attrs[ i ];
-						let val = attr.value;
-						if( val ) {
-							if( typeof val === "string" ) {
-								if( val.match( /__/ ) ) {
-									attr.value = substitute( val, data );
-								}
-							}
-						}
-					}
-				}
+				return e.inject( data );
 			}
 
 			// The main function
