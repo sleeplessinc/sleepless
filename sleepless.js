@@ -958,7 +958,14 @@ IN THE SOFTWARE.
 				res.on( "end", () => {
 					let { statusCode, headers } = res;
 					if( statusCode >= 200  && statusCode < 300 ) {	// if it's an "okay" ...
-						okay( M.j2o( json ), res );		// done!
+						let r = M.j2o( json );
+						if( ! r ) {
+							return fail( "Error parsing response from server." );
+						}
+						if( r.error ) {
+							return fail( r.error );
+						}
+						okay( r.data, res );		// done!
 					} else {
 						if( statusCode >= 300 && statusCode < 400 ) {	// if it's a redirect ...
 							let url = headers[ "location" ] || headers[ "Location" ];	// get new url
@@ -1043,12 +1050,10 @@ IN THE SOFTWARE.
 			xhr.onload = function() {
 				let r = M.j2o( xhr.responseText );
 				if( ! r ) {
-					fail( "Error parsing response from server." );
-					return;
+					return fail( "Error parsing response from server." );
 				}
 				if( r.error ) {
-					fail( r.error );
-					return;
+					return fail( r.error );
 				}
 				okay( r.data, xhr );
 			};
