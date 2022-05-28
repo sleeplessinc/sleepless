@@ -1105,6 +1105,10 @@ IN THE SOFTWARE.
 			return this;
 		};
 
+		HTMLElement.prototype.hasClass = function(c) {
+			return this.classList.contains( c );
+		};
+
 		// Remove a class from an element
 		HTMLElement.prototype.remClass = function(c) {
 			let cl = this.classList;
