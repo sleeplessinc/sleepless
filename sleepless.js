@@ -1017,13 +1017,9 @@ IN THE SOFTWARE.
 					if( statusCode >= 200  && statusCode < 300 ) {
 						// it's an "okay"
 						let r = M.j2o( json );
-						if( ! r ) {
+						if( ! r )
 							return fail( "Error parsing response from server." );
-						}
-						if( r.error ) {
-							return fail( r.error );
-						}
-						okay( r.data, res );
+						return okay( r.data, res );
 					} else {
 						if( statusCode >= 300 && statusCode < 400 ) {
 							// it's a redirect ...
@@ -1033,7 +1029,7 @@ IN THE SOFTWARE.
 							M.rpc( url, okay, fail, _get, _redirects + 1 );
 						} else {
 							// not a redirect so fail
-							fail( "HTTP Error "+statusCode, json, req );
+							return fail( "HTTP Error "+statusCode, json, req );
 						}
 					}
 				});
