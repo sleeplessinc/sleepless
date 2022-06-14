@@ -981,6 +981,68 @@ IN THE SOFTWARE.
 			req.end();
 		};
 
+		M.rpc2 = function( url, opts, data, okay = ()=>{}, fail = ()=>{}, _redirects = 0 ) {
+
+			// check for looping
+			_redirects = M.toInt( _redirects );
+			if( _redirects > 10 )
+				return fail( "Too many redirects" ); // methinks we loopeth
+
+			if( ! opts.method )
+				opts.method = "POST";
+			if( ! opts.headers )
+				opts.headers = {};
+
+			if( opts.method.toUpperCase() == "POST" ) {
+				// set content-type for POST requests
+				opts.headers[ "Content-Type" ] = "application/json";
+			} else {
+				// add data to the URL as query args for non-POST requests
+				let arr = [];
+				for( let k in data ) {
+					arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
+				}
+				if( arr.length > 0 ) {
+					url += "?" + arr.join( "&" );
+				}
+				data = null;
+			}
+
+			let json = "";	// collected response
+			let req = require( "https" ).request( url, opts, res => {
+				res.setEncoding( "utf8" );
+				res.on( "data", chunk => { json += chunk; } );
+				res.on( "end", () => {
+					let { statusCode, headers } = res;
+					if( statusCode >= 200  && statusCode < 300 ) {
+						// it's an "okay"
+						let r = M.j2o( json );
+						if( ! r ) {
+							return fail( "Error parsing response from server." );
+						}
+						if( r.error ) {
+							return fail( r.error );
+						}
+						okay( r.data, res );
+					} else {
+						if( statusCode >= 300 && statusCode < 400 ) {
+							// it's a redirect ...
+							// get new url
+							let url = headers[ "location" ] || headers[ "Location" ];
+							// recursively try the new location
+							M.rpc( url, okay, fail, _get, _redirects + 1 );
+						} else {
+							// not a redirect so fail
+							fail( "HTTP Error "+statusCode, json, req );
+						}
+					}
+				});
+			});
+			req.on( "error", fail );
+			req.write( data ? o2j( data ) : "" );
+			req.end();
+		};
+
 
 		// This is a connect/express middleware that creates okay()/fail() functions on the response
 		// object for responding to an HTTP request with a JSON payload.

@@ -132,12 +132,6 @@ Thing = function() {
 	this.name = "Mr. Thing";
 }
 
-rpc( "https://rpc.sleepless.com/rpc/", { api: "ping" }, function( data ) {
-	log( o2j( data ) );
-}, function(err) {
-	throw err;
-});
-
 if( isNode ) {
 	throwIf( sha1("I have a lovely bunch of coconuts.") !== "9fd0f467384256f02560d0694316b6d9bdfe7c68");
 	throwIf( sha256("I have a lovely bunch of coconuts.") !== "1a983ac204ea2bc92d8871d53111e021483c12a3e1ccb8ec59b0d62f3167cb13");
@@ -191,6 +185,18 @@ if( isNode ) {
 	ds2 = new DS( "test.json" );
 	throwIf( ds2.bar !== 7 );
 }
+
+rpc( "https://rpc.sleepless.com/rpc/", { api: "ping" }, function( data ) {
+	log( o2j( data ) );
+}, function(err) {
+	throw err;
+});
+
+rpc2( "https://rpc.sleepless.com/rpc/", { headers: { "ARG": "foo", } }, { api: "wob", action: "start_wob" }, function( data ) {
+	log( o2j( data ) );
+}, function(err) {
+	throw err;
+});
 
 
 
