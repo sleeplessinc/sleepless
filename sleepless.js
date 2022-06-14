@@ -1019,7 +1019,7 @@ IN THE SOFTWARE.
 						let r = M.j2o( json );
 						if( ! r )
 							return fail( "Error parsing response from server." );
-						return okay( r.data, res );
+						return okay( r, res );
 					} else {
 						if( statusCode >= 300 && statusCode < 400 ) {
 							// it's a redirect ...
