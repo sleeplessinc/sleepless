@@ -1016,6 +1016,7 @@ IN THE SOFTWARE.
 					let { statusCode, headers } = res;
 					if( statusCode >= 200  && statusCode < 300 ) {
 						// it's an "okay"
+						// XXX make this tolerate an empty response
 						let r = M.j2o( json );
 						if( ! r )
 							return fail( "Error parsing response from server." );
