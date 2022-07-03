@@ -1027,7 +1027,7 @@ IN THE SOFTWARE.
 							// get new url
 							let url = headers[ "location" ] || headers[ "Location" ];
 							// recursively try the new location
-							M.rpc( url, okay, fail, _get, _redirects + 1 );
+							M.rpc2( url, opts, data, okay, fail, _get, _redirects + 1 );
 						} else {
 							// not a redirect so fail
 							return fail( "HTTP Error "+statusCode, json, req );
