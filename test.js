@@ -192,7 +192,7 @@ rpc( "https://rpc.sleepless.com/rpc/", { api: "ping" }, function( data ) {
 	throw err;
 });
 
-rpc2( "https://rpc.sleepless.com/rpc/", { headers: { "ARG": "foo", } }, { api: "wob", action: "start_wob" }, function( data ) {
+rpc2( "https://rpc.sleepless.com/rpc/", { headers: { "ARG": "foo", } }, { api: "ping", }, function( data ) {
 	log( o2j( data ) );
 }, function(err) {
 	throw err;
