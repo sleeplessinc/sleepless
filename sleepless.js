@@ -1675,7 +1675,11 @@ IN THE SOFTWARE.
 	}
 
 
-	// Tire of constantly calling this ... just globalizing everything
+	// New suggest usage:
+	//	node:
+	//		const { rpc, log5, toInt } = require( "sleepless" );
+	//	browser:
+	//		const { rpc, log5, toInt } = sleepless;
 	/*
 	let g = isBrowser ? window : global;
 	for( let k in M ) {
