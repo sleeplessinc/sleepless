@@ -1676,10 +1676,12 @@ IN THE SOFTWARE.
 
 
 	// Tire of constantly calling this ... just globalizing everything
+	/*
 	let g = isBrowser ? window : global;
 	for( let k in M ) {
 		g[ k ] = M[ k ];
 	}
+	*/
 
 	if(isNode) {
 		module.exports = M;
