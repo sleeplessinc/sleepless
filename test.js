@@ -3,7 +3,11 @@ let isBrowser = typeof global === "undefined";
 let isNode = ! isBrowser;
 
 var l = console.log
-require("./sleepless.js")
+const sleepless = require("./sleepless.js")
+// globalize
+for(k in sleepless) {
+    global[k] = sleepless[k]
+}
 
 o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
 j = JSON.stringify(o);
