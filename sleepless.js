@@ -1514,6 +1514,100 @@ IN THE SOFTWARE.
 			Nav.current_show(data);
 		};
 
+		// Lets you navigate through pseudo-pages within an actual page
+		// without any actual document fetching from the server.
+        // Nav( data_object )
+        // Nav( data_object, show_function )
+        // Nav( show_function )
+		M.Nav2 = function( data, new_show ) {
+
+			if( typeof data === "function" ) {
+				new_show = data;
+				data = null;
+			}
+
+			if( ! data ) {
+				// no data object passed in; use current query data 
+				data = {};
+				const a = document.location.search.split( /[?&]/ );
+				a.shift();
+				a.forEach( function( kv ) {
+					var p = kv.split( "=" );
+					data[ p[ 0 ] ] = ( p.length > 1 ) ? decodeURIComponent( p[ 1 ] ) : "";
+				})
+			}
+
+			var state = { pageYOffset: 0, data };
+
+			// build URL + query-string from current path and contents of 'data'
+			const qs = "";
+			for( let k in data ) {
+				qs += (qs ? "&" : "?") + k + "=" + encodeURIComponent(data[k]);
+			}
+			const url = document.location.pathname + qs;
+
+			// if browser doesn't support pushstate, just redirect to the url
+			if( history.pushState === undefined ) {
+				document.location = url;
+				return;
+			}
+
+            Nav.default_show = function( data ) {
+                if( data[ "page" ] !== undefined ) {
+                    // hide all elements with class "page" by setting
+                    // css display to "none"
+                    const pages = M.QS( "page" );
+                    for( let p of pages ) {
+                        if( p._nav === undefined ) {
+                            p._nav = {};
+                        }
+                        p._nav.orig_display = p.style.display;
+                        p.style.display = "none";
+                    }
+                    // jump to top of document
+                    document.body.scrollIntoView();
+                    // show the new page
+                    const p = QS1( "page[name=" + data.page + "]" );
+                    if( p ) {
+                        p.style.display = p._nav.orig_display;
+                    } else {
+                        throw new Error( "Nav: No page with name " + page );
+                    }
+                }
+            };
+
+			if( ! Nav.current_show ) {
+				// 1st time Nav() has been called
+
+				// Set up the built-in default show function
+				Nav.current_show = Nav.default_show;
+
+				if( history.replaceState !== undefined ) {
+					// set state for the current/initial location
+					history.replaceState( state, "", url );
+					// wire in the pop handler
+					window.onpopstate = function( evt ) {
+						if( evt.state ) {
+							const data = evt.state;
+							Nav.current_show( evt.state.data );
+						}
+					}
+				}
+
+			} else {
+				// this is 2nd or later call to Nav()
+				state.pageYOffset = window.pageYOffset;
+				history.pushState( state, "", url );
+			}
+
+			// if new show func supplied, start using that one
+			if( new_show ) {
+				Nav.current_show = new_show;
+			}
+
+			Nav.current_show( data );
+		};
+
 
 		// Ties a Javascript object to some user interface elements in the browser DOM.
 		// If anything changes in the data object then mod_cb is called.
