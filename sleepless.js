@@ -1552,7 +1552,7 @@ IN THE SOFTWARE.
 				return;
 			}
 
-            Nav.default_show = function( data ) {
+            M.Nav2.default_show = function( data ) {
                 if( data[ "page" ] !== undefined ) {
                     // hide all elements with class "page" by setting
                     // css display to "none"
@@ -1560,8 +1560,8 @@ IN THE SOFTWARE.
                     for( let p of pages ) {
                         if( p._nav === undefined ) {
                             p._nav = {};
+                            p._nav.orig_display = p.style.display;
                         }
-                        p._nav.orig_display = p.style.display;
                         p.style.display = "none";
                     }
                     // jump to top of document
@@ -1571,16 +1571,16 @@ IN THE SOFTWARE.
                     if( p ) {
                         p.style.display = p._nav.orig_display;
                     } else {
-                        throw new Error( "Nav: No page with name " + page );
+                        throw new Error( "Nav2: No page with name " + page );
                     }
                 }
             };
 
-			if( ! Nav.current_show ) {
-				// 1st time Nav() has been called
+			if( ! Nav2.current_show ) {
+				// 1st time Nav2() has been called
 
 				// Set up the built-in default show function
-				Nav.current_show = Nav.default_show;
+				Nav2.current_show = Nav2.default_show;
 
 				if( history.replaceState !== undefined ) {
 					// set state for the current/initial location
@@ -1589,23 +1589,23 @@ IN THE SOFTWARE.
 					window.onpopstate = function( evt ) {
 						if( evt.state ) {
 							const data = evt.state;
-							Nav.current_show( evt.state.data );
+							Nav2.current_show( evt.state.data );
 						}
 					}
 				}
 
 			} else {
-				// this is 2nd or later call to Nav()
+				// this is 2nd or later call to Nav2()
 				state.pageYOffset = window.pageYOffset;
 				history.pushState( state, "", url );
 			}
 
 			// if new show func supplied, start using that one
 			if( new_show ) {
-				Nav.current_show = new_show;
+				Nav2.current_show = new_show;
 			}
 
-			Nav.current_show( data );
+			Nav2.current_show( data );
 		};
 
 
