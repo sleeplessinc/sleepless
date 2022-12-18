@@ -1540,7 +1540,7 @@ IN THE SOFTWARE.
 			var state = { pageYOffset: 0, data };
 
 			// build URL + query-string from current path and contents of 'data'
-			const qs = "";
+			let qs = "";
 			for( let k in data ) {
 				qs += (qs ? "&" : "?") + k + "=" + encodeURIComponent(data[k]);
 			}
