@@ -804,7 +804,7 @@ IN THE SOFTWARE.
 						if( isNode ) {				// and we're in node ...
 							x = util.inspect( x, { depth: 10 } );	// convert obj to formatted JSON
 						} else {					// otherwise ...
-							x = o2j( x );			// just convert obj to JSON
+							x = M.o2j( x );			// just convert obj to JSON
 						}
 					}
 					s += x;					// append to the growing string
@@ -977,7 +977,7 @@ IN THE SOFTWARE.
 				});
 			});
 			req.on( "error", fail );
-			req.write( _get ? "" : o2j( data ) );
+			req.write( _get ? "" : M.o2j( data ) );
 			req.end();
 		};
 
@@ -1040,7 +1040,7 @@ IN THE SOFTWARE.
 				});
 			});
 			req.on( "error", fail );
-			req.write( data ? o2j( data ) : "" );
+			req.write( data ? M.o2j( data ) : "" );
 			req.end();
 		};
 
@@ -1067,13 +1067,13 @@ IN THE SOFTWARE.
 			// XXX Add ttl feature
 			get: function( k ) {
 				try {
-					return j2o( localStorage.getItem( k ) );
+					return M.j2o( localStorage.getItem( k ) );
 				} catch( e ) { }
 				return null;
 			},
 			set: function( k, v ) {
 				try {
-					return localStorage.setItem( k, o2j( v ) );
+					return localStorage.setItem( k, M.o2j( v ) );
 				} catch( e ) { }
 				return null;
 			},
