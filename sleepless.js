@@ -1132,6 +1132,45 @@ IN THE SOFTWARE.
 			}
 		};
 
+		M.rpc2 = function( url, opts, data, okay = ()=>{}, fail = ()=>{}, _redirects = 0 ) {
+			let method = opts.method ? opts.method.ucase() : "POST";
+            let headers = opts.headers ? opts.headers : {};
+			if( method == "GET" ) {	// if using GET ...
+				// add the data to the URL as query args
+				let arr = [];
+				for( let k in data ) {
+					arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
+				}
+				if( arr.length > 0 ) {
+					url += "?" + arr.join( "&" );
+				}
+			}
+			let xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				let r = M.j2o( xhr.responseText );
+				if( ! r ) {
+					return fail( "Error parsing response from server." );
+				}
+				if( r.error ) {
+					return fail( r.error );
+				}
+				okay( r.data, xhr );
+			};
+			xhr.onerror = fail;
+			xhr.open( method, url );
+			if( method != "GET" )
+				xhr.setRequestHeader( "Content-Type", "application/json" );
+			xhr.setRequestHeader( "Accept", "application/json" );
+            for( let k in opts.headers ) {
+                xhr.setRequestHeader( k, opts.headers[ k ] );
+            }
+			if( method != "GET" && data ) {
+				xhr.send( M.o2j( data ) );
+			} else {
+				xhr.send();
+			}
+		};
+
 
 		// Returns an object constructed from the current page's query args.
 		M.getQueryData = function() {
@@ -1198,6 +1237,14 @@ IN THE SOFTWARE.
 		// Find first child element matching query selector
 		HTMLElement.prototype.find1 = function( qs ) {
 			return this.find( qs )[ 0 ];
+		}
+
+		HTMLElement.prototype.findNamed = function( name ) {
+			return this.find( "[name="+name+"]" );
+		}
+
+		HTMLElement.prototype.findNamed1 = function( name ) {
+			return this.findNamed( name )[ 0 ];
 		}
 
 		// Get (or set if v is provided) an attribute's value

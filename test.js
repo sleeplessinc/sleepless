@@ -6,7 +6,7 @@ var l = console.log
 const sleepless = require("./sleepless.js")
 // globalize
 for(k in sleepless) {
-    global[k] = sleepless[k]
+    globalThis[k] = sleepless[k]
 }
 
 o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
@@ -143,6 +143,9 @@ if( isNode ) {
 
 if( isBrowser ) {
 
+    // test findNamed() and findNamed1()
+    document.body.findNamed1( "msg" ).html( "findNamed1() works!" );
+
 	let o = { x: 3 };
 	let j = o2j( o );
 	LS.set( "foo", { x: 3 } );
@@ -156,6 +159,7 @@ if( isBrowser ) {
 		{ foo: "rplc8 foo #1" },
 		{ foo: "rplc8 foo #2" },
 	]);
+
 
 }
 
