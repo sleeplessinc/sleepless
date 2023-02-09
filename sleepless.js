@@ -1259,15 +1259,27 @@ IN THE SOFTWARE.
 		};
 
 		// Get (or set if v is provided) an element's value
-		HTMLElement.prototype.val = function(v) {
+		HTMLElement.prototype.val = function(v, chg = false) {
 			if(v !== undefined) {
 				this.value = v;
+                if( chg ) {
+                    // fire a change event
+                    const evt = new Event( "change" );
+                    this.dispatchEvent( evt );
+                }
 				return this;
 			}
 			else {
 				return (this.value || "").trim();
 			}
 		};
+
+        // fire a change event on an element
+        HTMLElement.prototype.change = function() {
+            const evt = new Event( "change" );
+            this.dispatchEvent( evt );
+            return this;
+        };
 
 		// Get (or set if h is provided) an element's innerHTML
 		HTMLElement.prototype.html = function(h) {
