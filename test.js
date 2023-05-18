@@ -101,6 +101,13 @@ throwIf( ts2us_hm(1384565221) !== "17:27" );
 throwIf( ts2us_mdyhm(1384565221) !== "11/15/2013 17:27" );
 throwIf( ts2us_mdy2hm(1384565221) !== "11/15/13 17:27" );
 throwIf( ts2us_dMy(1384565221) !== "15-Nov-2013" );
+throwIf( ts2us_md(0) !== "" );
+throwIf( ts2us_mdy(0) !== "" );
+throwIf( ts2us_mdy2(0) !== "" );
+throwIf( ts2us_hm(0) !== "" );
+throwIf( ts2us_mdyhm(0) !== "" );
+throwIf( ts2us_mdy2hm(0) !== "" );
+throwIf( ts2us_dMy(0) !== "" );
 
 throwIf( !( us2dt("11/15/2013 17:27:01") instanceof Date) );
 throwIf( dt2ts( us2dt("11/15/2013 17:27:01") ) !== 1384565221 );

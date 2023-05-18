@@ -261,7 +261,7 @@ IN THE SOFTWARE.
 		return M.dt2ts(M.us2dt(us, utc));
 	}
 
-	// Convert Unix timestamp to "MM/DD/YYYY HH:MM:SS".
+	// Convert Unix timestamp to "MM/DD/YYYY HH:MM:SS" or "" if ts is 0
 	M.ts2us = function(ts) {
 		var d = M.ts2dt(ts);
 		if(!d) {
@@ -282,42 +282,45 @@ IN THE SOFTWARE.
 			"";
 	}
 
-	// Convert Unix timestamp to "MM/DD".
+	// Convert Unix timestamp to "MM/DD" or "" if ts is 0
 	M.ts2us_md = function(ts) {
 		return M.ts2us(ts).substr(0, 5);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YYYY".
+	// Convert Unix timestamp to "MM/DD/YYYY" or "" if ts is 0
 	M.ts2us_mdy = function(ts) {
 		return M.ts2us(ts).substr(0, 10);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YY"
+	// Convert Unix timestamp to "MM/DD/YY" or "" if ts is 0
 	M.ts2us_mdy2 = function(ts) {
-		var a = M.ts2us_mdy(ts).split("/");
-		if(a.length != 3) {
-			return a;
-		}
-		a[2] = a[2].substr(2);
-		return a.join("/");
+        let us = M.ts2us_mdy(ts);
+        if( us != "" ) {
+            var a = us.split("/");
+            a[2] = a[2].substr(2);
+            us = a.join("/");
+        }
+        return us;
 	}
 
-	// Convert Unix timestamp to "HH:MM"
+	// Convert Unix timestamp to "HH:MM" or "" if ts is 0
 	M.ts2us_hm = function(ts) {
 		return M.ts2us(ts).substr(11, 5);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YYYY HH:MM"
+	// Convert Unix timestamp to "MM/DD/YYYY HH:MM" or "" if ts is 0
 	M.ts2us_mdyhm = function(ts) {
-		return M.ts2us_mdy(ts) + " " + M.ts2us_hm(ts);
+        let s = M.ts2us_mdy(ts) + " " + M.ts2us_hm(ts);
+		return s != " " ? s : "" ;
 	}
 
-	// Convert Unix timestamp to "MM/DD/YY HH:MM"
+	// Convert Unix timestamp to "MM/DD/YY HH:MM" or "" if ts is 0
 	M.ts2us_mdy2hm = function(ts) {
-		return M.ts2us_mdy2(ts) + " " + M.ts2us_hm(ts);
+        let s = M.ts2us_mdy2(ts) + " " + M.ts2us_hm(ts);
+		return s != " " ? s : "" ;
 	}
 
-	// Convert Unix timestamp to something like "01-Jan-2016"
+	// Convert Unix timestamp to something like "01-Jan-2016" or "" if ts is 0
 	M.ts2us_dMy = function(ts) {
 		var d = M.ts2dt(ts);
 		if(!d) {
