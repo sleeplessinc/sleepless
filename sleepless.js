@@ -51,7 +51,7 @@ IN THE SOFTWARE.
 	M.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 
 	// convert and return object as JSON or null if exception
-	M.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
+	M.o2j = function(v, r, s) { try { return JSON.stringify(v, r, s) } catch(e) { return null } }
 
 
 	// convert whatever to float or 0 if not at all numberlike
@@ -903,7 +903,7 @@ IN THE SOFTWARE.
 				const self = this;
 				f = f || self.file;
 				self.__proto__.file = f;
-				fs.writeFileSync( f, JSON.stringify( self ) );
+				fs.writeFileSync( f, JSON.stringify( self, null, 4 ) );
 			}
 			const clear = function() {
 				const self = this;
