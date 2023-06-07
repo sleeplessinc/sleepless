@@ -1190,6 +1190,17 @@ IN THE SOFTWARE.
 		};
 
 
+		// Return all elements matching query selector as an array
+		M.QS = function( qs ) {
+			return document.querySelectorAll( qs ).toArray();
+		};
+
+		// Return first element matching query selector
+		M.QS1 = function( qs ) {
+			return M.QS( qs )[ 0 ];
+		};
+
+
 		// Convert HTMLCollection to normal array
 		HTMLCollection.prototype.toArray = function() {
 			let arr = [];
@@ -1222,15 +1233,35 @@ IN THE SOFTWARE.
 			return this;
 		};
 
-		// Return all elements matching query selector as an array
-		M.QS = function( qs ) {
-			return document.querySelectorAll( qs ).toArray();
-		};
+        // Remember original display, then set display to 'none'
+        HTMLElement.prototype.hide = function() {
+            if( this.style._orig_display === undefined )
+                this.style._orig_display = this.style.display;
+            this.style.display = "none";
+            return this;
+        };
 
-		// Return first element matching query selector
-		M.QS1 = function( qs ) {
-			return M.QS( qs )[ 0 ];
-		};
+        // If original display was remembered, set display to that
+        // Note unhide() is not exactly the same as show()
+        HTMLElement.prototype.unhide = function() {
+            if( this.style._orig_display !== undefined )
+                this.style.display = this.style._orig_display;
+            return this;
+        };
+
+
+        // Remember original display, then set display to 'inherit'
+        HTMLElement.prototype.show = function() {
+            if( this.style._orig_display === undefined )
+                this.style._orig_display = this.style.display;
+            this.style.display = "inherit";
+            return this;
+        }
+
+        // If original display was remembered, set display to that
+        // Note unshow() is not exactly the same as hide()
+        HTMLElement.prototype.unshow = HTMLElement.prototype.unhide;
+
 
 		// Find all child elements matching query selector
 		HTMLElement.prototype.find = function( qs ) {

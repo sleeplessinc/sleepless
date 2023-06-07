@@ -14,5 +14,14 @@
 		function require() { return globalThis.sleepless; }
 	</script>
 	<script src="test.js"></script>
+
+
+    <div id=stuff>This is some stuff</div><br>
+    <button onclick="QS1('#stuff').hide()">Hide stuff</button>
+    <button onclick="QS1('#stuff').unhide()">Unhide stuff</button>
+    <button onclick="QS1('#stuff').show()">Show stuff</button>
+    <button onclick="QS1('#stuff').unshow()">Unshow stuff</button>
+
+
 </body>
 </html>
