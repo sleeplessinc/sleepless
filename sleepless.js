@@ -576,52 +576,77 @@ IN THE SOFTWARE.
 		return o;
 	}
 
-	/*
-	Run a queue of functions sequentially, e.g:
-		runq()
-		.add(function(cb, a) {
-			cb(null, a + 1);
-		})
-		.add(function(cb, a) {
-			cb(null, a + 1);
-		})
-		.run(function(err, r) {
-			// all done
-			if(err) {
-				// ...
-			}
-			else {
-				console.log(a);		// 3
-			}
-		}, 1)
-	*/
-	M.runq = function() {
-		var o = {};
-		var q = []
-		var add = function(f) {
-			q.push(f);
-			return o;
-		};
-		var run = function(cb, arg) {
-			if(q.length == 0) {
-				cb(null, arg);
-				return;
-			}
-			var f = q.shift();
-			f(function(e, arg) {
-				if(e) {
-					q = [];
-					cb(e, arg);
+	// Run some functions synchronously ( see test.js )
+	M.runq = function( a_this, ...args ) {
+
+		const legacy_runq = function() {
+			var o = {};
+			var q = []
+			var add = function(f) {
+				q.push(f);
+				return o;
+			};
+			var run = function(cb, arg) {
+				if(q.length == 0) {
+					cb(null, arg);
+					return;
 				}
-				else {
-					run(cb, arg);
-				}
-			}, arg);
+				var f = q.shift();
+				f(function(e, arg) {
+					if(e) {
+						q = [];
+						cb(e, arg);
+					}
+					else {
+						run(cb, arg);
+					}
+				}, arg);
+			};
+			o.add = add
+			o.run = run
+			return o
 		};
-		o.add = add
-		o.run = run
-		return o
-	}
+		if( a_this === undefined && args.length == 0 ) {
+			return legacy_runq(); // revert to old behavior
+		}
+
+		const queue = [];		// holds the queued calls
+		const results = [];		// collects the results from each call
+
+		// Add a call to the queue
+		const add = function( fun, ...args ) {
+			queue.push( { fun, args } );
+			return me;
+		}
+
+		// starts the queue running
+		const start = function( _okay, _fail ) {
+			const call_one = function() {
+				const next = queue.shift();	// get next call from queue, which is an array
+				if( ! next ) {
+					// queue empty; all done
+					_okay( results );
+					return;
+				}
+				const { fun, args } = next;	// dereference function and args
+				// append okay and fail args
+				args.push( function( data ) {
+					results.push( data );	// store the returned results
+					setTimeout( call_one, 1 );	// move on to the next call
+				} );
+				args.push( function( error ) {
+					_fail( error );		// call the _fail function; nothing else happens
+				} );
+				fun.apply( a_this, args );	// call the function with the remaining array elements as args
+			};
+			call_one();
+			return me;
+		}
+
+		const me = { add, start };
+
+		return me;
+	};
 
 
 	// Sort of like Markdown, but not really.
