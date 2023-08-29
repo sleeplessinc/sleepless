@@ -482,103 +482,109 @@ IN THE SOFTWARE.
 	}
 
 	
-	/*
-	Run some functions in parallel, e.g:
+	// Run some functions in parallel / simultaneously
+	M.runp = function( a_this, ...args ) {
 
-		runp()						// create a runner object
-
-		.add(function(cb) {			// add a simple function that does something
-			// do something.
-			cb();	// call this when it's done
-		})
-
-		.add(function(cb, str) {	// pass in an argument and also return an error
-			// str == "foo"
-			cb("error "+str);
-		}, "foo")
-
-		.add(function(cb, str1, str2) {		// pass in multiple args
-			// str1 == "bar", str2 = "baz"
-			cb(null, "okay "+str1+" "+str2);
-		}, "bar", "baz")
-
-		.add( [ 7, 11 ], function( cb, num, str ) {		// call the func once for each item in an array
-			// this function called twice once with num = 7 and once with num = 11
-			// both times str = "qux"
-			cb(null, "okay "+num+" "+str);
-		}, "qux")
-
-		// All the calls are set up but nothing happens until
-		// I call run() on the runner object, at which point all the functions
-		// will be fired off in parallel.  When they're all completed (okay or fail)
-		// the the call back calls you with an array of errors and results.
-
-		.run(function(errors, results) {
-			// all the functions have completed
-			// errors = [null, "error foo", null, null, null ];
-			// results = [null, null, "okay bar baz", "okay 7 qux", "okay 11 qux" ];
-		})
-	*/
-	M.runp = function() {
-		var o = {};
-		var q = [];
-
-		// Adds a function to the runp object
-		var add = function add() {
-			let args = Array.prototype.slice.call(arguments);
-			if( typeof args[ 0 ] === "function" ) {
-				q.push( args );
+		const legacy_runp = function() {
+			var o = {};
+			var q = [];
+			var add = function add() {
+				let args = Array.prototype.slice.call(arguments);
+				if( typeof args[ 0 ] === "function" ) {
+					q.push( args );
+					return o;
+				}
+				let arr = args.shift();
+				let fun = args.shift();
+				arr.forEach( x => {
+					q.push( [ fun, x ].concat( args ) );
+				});
 				return o;
-			}
-			// assume it's an array and and 2nd arg is function
-			let arr = args.shift();
-			let fun = args.shift();
-			arr.forEach( x => {
-				q.push( [ fun, x ].concat( args ) );
-			});
+			};
+			var run = function(cb) {
+				var errors = [];
+				var results = [];
+				var num_done = 0;
+				if( q.length == 0 ) {
+					if(cb) {
+						cb(errors, results);
+					}
+					return;
+				}
+				q.forEach(function(args, i) {
+					let fun = args.shift();
+					args.unshift( function(e, r) {
+						errors[i] = e || null;
+						results[i] = r || null;
+						num_done += 1;
+						if(num_done == q.length) {
+							if(cb) {
+								cb(errors, results);
+							}
+						}
+					} );
+					fun.apply( null, args );
+				});
+			};
+			o.add = add;
+			o.run = run;
 			return o;
 		};
 
-		// Starts all the functions at once
-		var run = function(cb) {
-			var errors = [];
-			var results = [];
-			var num_done = 0;
-			if( q.length == 0 ) {
-				if(cb) {
-					cb(errors, results);
-				}
-				return;
-			}
-			q.forEach(function(args, i) {
-				let fun = args.shift();
-				// Call each function with a callback and an index # (0-based)
-				// The callback expect err, and result arguments.
-				args.unshift( function(e, r) {
-					// One of the functions is finished
-					errors[i] = e || null;
-					results[i] = r || null;
-					num_done += 1;
-					// when all finished, call the cb that was passed into run() with 
-					// a list of errors and results.
-					if(num_done == q.length) {
-						if(cb) {
-							cb(errors, results);
-						}
-					}
+		if( a_this === undefined && args.length == 0 ) {
+			return legacy_runp(); // revert to old behavior
+		}
+
+		const calls = [];
+
+		// Add a call 
+		const add = function( fun, ...args ) {
+			calls.push( { fun, args } );
+			return me;
+		}
+
+		const run = function( done ) {
+
+			const results = [];
+			let num_done = 0;
+
+			// advance the num_done count, then if we're finished, call done()
+			const one_done = function() {
+				num_done += 1;
+				if( num_done == calls.length )
+					done( results );
+			};
+
+			// step through all the calls and fire them off
+			calls.forEach( ( next, i ) => {
+				const { fun, args } = next;	// dereference function and args
+				// append okay, fail funcs to args
+				args.push( function( data ) {
+					results[ i ] = { data };	// store data in results and advance done count
+					one_done();
 				} );
-				fun.apply( null, args );
-			});
-		};
+				args.push( function( error ) {
+					results[ i ] = { error };	// store error in results and advance done count
+					one_done();
+				} );
+				fun.apply( a_this, args );	// call the function with the remaining array elements as args
 
-		o.add = add;
-		o.run = run;
-		return o;
-	}
+			} );
 
-	// Run some functions synchronously ( see test.js )
+			return me;
+		}
+
+		const me = { add, run };
+
+		return me;
+
+	};
+
+
+	// Run some functions sequentially / synchronously ( see test.js )
 	M.runq = function( a_this, ...args ) {
 
+		// This is the old original version
 		const legacy_runq = function() {
 			var o = {};
 			var q = []
@@ -620,7 +626,7 @@ IN THE SOFTWARE.
 		}
 
 		// starts the queue running
-		const start = function( _okay, _fail ) {
+		const run = function( _okay, _fail ) {
 			const call_one = function() {
 				const next = queue.shift();	// get next call from queue, which is an array
 				if( ! next ) {
@@ -643,7 +649,7 @@ IN THE SOFTWARE.
 			return me;
 		}
 
-		const me = { add, start };
+		const me = { add, run };
 
 		return me;
 	};

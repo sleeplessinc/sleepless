@@ -230,11 +230,55 @@ runq = sleepless.runq;
 runq( my_this )
 .add( f1, 10, 20 )
 .add( f2 )
-.start( results => {
+.run( results => {
 	throwIf( ! ( results && results.length === 2 && results[ 0 ] === 30 && results[ 1 ] === "bar") );
 	throwIf( my_this.count !== 3 );
-	log( "runq test passes" );
+	log( "runq pass" );
 }, error => {
 	console.error( error );
 } )
+
+
+log( "runp ... " );
+let runp_this = { foo: "bar", count: 0 }
+var f = function( num, arg, okay, fail ) {
+	this.count += 1;
+	const millis = 1000 + ( Math.random() * 1000 );
+	log( num + " running for " + millis + " millis ... arg=" + arg );
+	setTimeout( function() {
+		if( Math.random() >= 0.8 )
+			fail( num + " RANDOM ERROR");
+		else
+			okay( arg );
+	}, millis );
+}
+
+// run the example form the readme
+runp( runp_this )
+.add( f, 1, 7 )
+.add( f, 2, "foo" )
+.add( f, 3, [ 3, 5, 9 ] )
+.run( function( results ) {
+	// all the functions have completed
+	log( results );
+	throwIf( results.length !== 3 );
+	throwIf( my_this.count !== 3 );
+	results.forEach( ( r, i ) => {
+		throwIf( ! r.data && ! r.error );	// at least one should be set
+		throwIf( r.data && r.error );	// only one should be set
+		if( i == 0 && r.data ) {
+			throwIf( r.data !== 7 );
+		}
+		if( i == 1 && r.data ) {
+			throwIf( r.data !== "foo" );
+		}
+		if( i == 2 && r.data ) {
+			throwIf( ! ( r.data instanceof Array ) || r.data.length !== 3 );
+		}
+	} );
+	log( "runp pass" );
+})
+
+
+
 
