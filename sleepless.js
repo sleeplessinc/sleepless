@@ -483,6 +483,7 @@ IN THE SOFTWARE.
 
 	
 	// Run some functions in parallel / simultaneously
+	// runp() (no args) is DEPRECATED
 	M.runp = function( a_this, ...args ) {
 
 		const legacy_runp = function() {
@@ -582,6 +583,7 @@ IN THE SOFTWARE.
 
 
 	// Run some functions sequentially / synchronously ( see test.js )
+	// runq() (no args) is DEPRECATED
 	M.runq = function( a_this, ...args ) {
 
 		// This is the old original version
@@ -912,6 +914,10 @@ IN THE SOFTWARE.
 			var h = require("crypto").createHash("sha256");
 			h.update(s);
 			return h.digest("hex");
+		};
+
+		M.rand_hash = function( salt = "" ) {
+			return M.sha1( salt + ( Date.now() + M.time() ) );
 		};
 
 		// DS (datastore)
