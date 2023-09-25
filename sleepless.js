@@ -889,29 +889,73 @@ IN THE SOFTWARE.
 
 
 	if(isNode) {
+
 		// Node.js only stuff
+
+		const fs = require("fs");
+		const crypto = require("crypto");
+		const https = require("https");
 
 		// Read a file from disk
 		// Reads async if callback cb is provided,
 		// otherwise reads and returns contents synchronously.
 		M.getFile = function(path, enc, cb) {
-			var fs = require("fs");
 			if(!cb) {
 				return fs.readFileSync(path, enc);
 			}
 			fs.readFile(path, enc, cb);
 		};
 
+
+		// get fs stat object
+		// if cb provided, do it asyncrhonously and call cb
+		// returns fs.Stats object or null if error (ENOENT)
+		M.file_info = function( path, cb ) {
+			let st = null;
+			if( ! cb ) {
+				// do synchronously
+				st = fs.statSync( path, { throwIfNoEntry: false } );
+				return st;
+			}
+			// do async 
+			fs.stat( path, ( error, st ) => {
+				if( error )
+					cb( null );
+				else
+					cb( st );
+			} );
+		};
+
+		M.is_file = function( path, cb ) {
+			if( ! cb ) {
+				let st = M.file_info( path );
+				return st ? st.isFile() : false;
+			}
+			M.file_info( path, st => {
+				cb( st ? st.isFile() : false );
+			} );
+		};
+
+		M.is_dir = function( path, cb ) {
+			if( ! cb ) {
+				let st = M.file_info( path );
+				return st ? st.isDirectory() : false;
+			}
+			M.file_info( path, st => {
+				cb( st ? st.isDirectory() : false );
+			} );
+		};
+
 		// Return ASCII sha1 for a string
 		M.sha1 = function(s) {
-			var h = require("crypto").createHash("sha1");
+			var h = crypto.createHash("sha1");
 			h.update(s);
 			return h.digest("hex");
 		};
 
 		// Return ASCII sha256 for a string
 		M.sha256 = function(s) {
-			var h = require("crypto").createHash("sha256");
+			var h = crypto.createHash("sha256");
 			h.update(s);
 			return h.digest("hex");
 		};
@@ -922,7 +966,6 @@ IN THE SOFTWARE.
 
 		// DS (datastore)
 		(function() {
-			const fs = require( "fs" );
 			const load = function( f ) {
 				const self = this;
 				f = f || self.file;
@@ -992,7 +1035,7 @@ IN THE SOFTWARE.
 			if( method != "GET" )
 				opts.headers[ "Content-Type" ] = "application/json";
 			let json = "";	// collected response
-			let req = require( "https" ).request( url, opts, res => {
+			let req = https.request( url, opts, res => {
 				res.setEncoding( "utf8" );
 				res.on( "data", chunk => { json += chunk; } );
 				res.on( "end", () => {
@@ -1049,7 +1092,7 @@ IN THE SOFTWARE.
 			}
 
 			let json = "";	// collected response
-			let req = require( "https" ).request( url, opts, res => {
+			let req = https.request( url, opts, res => {
 				res.setEncoding( "utf8" );
 				res.on( "data", chunk => { json += chunk; } );
 				res.on( "end", () => {
@@ -1088,7 +1131,8 @@ IN THE SOFTWARE.
 		// This is a connect/express middleware that creates okay()/fail() functions on the response
 		// object for responding to an HTTP request with a JSON payload.
 		// XXX This may not really belong in sleepless.js
-		M.mw_fin_json = function( req, res, next ) {
+		// DEPRECATE and remove
+		/*M.mw_fin_json = function( req, res, next ) {
 			res.done = ( error, data ) => {
 				let json = JSON.stringify( { error, data } );
 				res.writeHead( 200, { "Content-Type": "application/json", });
@@ -1098,7 +1142,7 @@ IN THE SOFTWARE.
 			res.fail = ( error, body ) => { res.done( error, body ); };
 			res.okay = ( data ) => { res.done( null, data ); };
 			next();
-		};
+		};*/
 
 	} else {
 		// Browser only stuff
