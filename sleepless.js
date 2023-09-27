@@ -668,23 +668,36 @@ IN THE SOFTWARE.
 
 		// append/prepend a couple newlines so that regexps below will match at beginning and end
 		t = "\n\n" + t + "\n\n";		// note: will cause a <p> to always appear at start of output
-
+		// DEPRECATE - old style
 		// hyper link/anchor
 		// (link url)
 		// (link url alt_display_text)
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*\)/gi, "<a href=\"$1\">$1</a>");
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a href=\"$1\">$2</a>");
 
+		// DEPRECATE - old style
 		// hyper link/anchor that opens in new window/tab
 		// (xlink url)
 		// (xlink url alt_display_text)
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*\)/gi, "<a target=_blank href=\"$1\">$1</a>");
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a target=_blank href=\"$1\">$2</a>");
 
+		// DEPRECATE - old style
 		// image
 		// (image src title)
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*\)/gi, "<img src=\"$1\">");
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<img src=\"$1\" title=\"$2\">");
+
+
+		// hyper link/anchor
+		t = t.replace( /\^\^\s*([^\s]*)\s*\^\^/gi, "^$1 $1^" );
+		t = t.replace( /\^\^\s*([^\s]*)\s+([^\^]+)\^\^/gi, "<a target=_blank href=\"$1\">$2</a>" );
+		t = t.replace( /\^\s*([^\s]*)\s*\^/gi, "^$1 $1^" );
+		t = t.replace( /\^\s*([^\s]*)\s+([^\^]+)\^/gi, "<a href=\"$1\">$2</a>" );
+
+		// image
+		t = t.replace(/\|\s*([^\s\)]+)\s*\|/gi, "(image $1 $1)");
+		t = t.replace(/\|\s*([^\s\)]+)\s*([^\)]+)\|/gi, "<img src=\"$1\" title=\"$2\">");
 
 		// figure
 		// (figure src caption)
@@ -700,8 +713,8 @@ IN THE SOFTWARE.
 		t = t.replace(/\(tm\)/gi, "&trade;");	
 		t = t.replace(/\(r\)/gi, "&reg;");	
 		t = t.replace(/\(c\)/gi, "&copy;");
-		t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
-		t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
+		//t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
+		//t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
 
 		// one or more blank lines mark a paragraph
 		t = t.replace(/\n\n+/gi, "\n\n<p>\n");
@@ -765,7 +778,7 @@ IN THE SOFTWARE.
 		// # item 2
 		// 1. item 3
 		t = t.replace(/\n((\s*(\d+|#)\.?\s+[^\n]+\n)+)/gi, "\n<ol>\n$1\n</ol>");
-		t = t.replace(/\n(\d+|#)\.?\s+([^\n]+)/gi, "\n<li>$2</li>");
+		t = t.replace(/\n\s*(\d+|#)\.?\s+([^\n]+)/gi, "\n<li>$2</li>");
 
 		// Horiz. rule
 		// ---- (4 or more dashes)
