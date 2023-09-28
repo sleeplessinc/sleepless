@@ -901,7 +901,15 @@ IN THE SOFTWARE.
 	})();
 
 
-	if(isNode) {
+	// Make all the sleepless functions/objects into globals (if you feel you must, and I often do)
+	M.globalize = function() {
+		for( const k in M ) {
+			globalThis[ k ] = M[ k ];
+		}
+	};
+
+
+	if( isNode ) {
 
 		// Node.js only stuff
 
@@ -912,12 +920,15 @@ IN THE SOFTWARE.
 		// Read a file from disk
 		// Reads async if callback cb is provided,
 		// otherwise reads and returns contents synchronously.
-		M.getFile = function(path, enc, cb) {
+		M.get_file = function(path, enc, cb) {
 			if(!cb) {
 				return fs.readFileSync(path, enc);
 			}
 			fs.readFile(path, enc, cb);
 		};
+
+		// DEPRECATE in favor of get_file();
+		M.getFile = M.get_file;
 
 
 		// get fs stat object
@@ -1077,6 +1088,7 @@ IN THE SOFTWARE.
 			req.end();
 		};
 
+
 		M.rpc2 = function( url, opts, data, okay = ()=>{}, fail = ()=>{}, _redirects = 0 ) {
 
 			// check for looping
@@ -1187,12 +1199,16 @@ IN THE SOFTWARE.
 
 
 		// Make an async HTTP GET request for a URL
-		M.getFile = function(url, cb) {
+		M.get_file = function(url, cb) {
 			var x = new XMLHttpRequest();
 			x.onload = function() { cb(x.responseText, x); };
 			x.open("GET", url);
 			x.send();
 		};
+
+		// DEPRECATE in favor of get_file();
+		M.getFile = M.get_file;
+
 
 		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false ) {
 			if( _get ) {	// if using GET ...
@@ -1270,7 +1286,7 @@ IN THE SOFTWARE.
 
 
 		// Returns an object constructed from the current page's query args.
-		M.getQueryData = function() {
+		M.query_data = function() {
 			var o = {};
 			var s = document.location.search;
 			if(s) {
@@ -1282,6 +1298,9 @@ IN THE SOFTWARE.
 			}
 			return o
 		};
+
+		// DEPRECATE in favor of query_data()
+		M.getQueryData = M.query_data;
 
 
 		// Return all elements matching query selector as an array
@@ -1479,8 +1498,6 @@ IN THE SOFTWARE.
 				}
 			}
 		};
-
-
 
 
 		// ---------------------------------------
@@ -1715,13 +1732,14 @@ IN THE SOFTWARE.
 
 			if( ! data ) {
 				// no data object passed in; use current query data 
-				data = {};
-				const a = document.location.search.split( /[?&]/ );
-				a.shift();
-				a.forEach( function( kv ) {
-					var p = kv.split( "=" );
-					data[ p[ 0 ] ] = ( p.length > 1 ) ? decodeURIComponent( p[ 1 ] ) : "";
-				})
+				//data = {};
+				//const a = document.location.search.split( /[?&]/ );	
+				//a.shift();
+				//a.forEach( function( kv ) {
+				//	var p = kv.split( "=" );
+				//	data[ p[ 0 ] ] = ( p.length > 1 ) ? decodeURIComponent( p[ 1 ] ) : "";
+				//})
+				data = query_data();
 			}
 
 			var state = { pageYOffset: 0, data };
@@ -1754,11 +1772,12 @@ IN THE SOFTWARE.
                     // jump to top of document
                     document.body.scrollIntoView();
                     // show the new page
-                    const p = QS1( "page[name=" + data.page + "]" );
-                    if( p ) {
-                        p.style.display = p._nav.orig_display;
+					const pg = data.page;
+                    const el = QS1( "page[name=" + pg + "]" );
+                    if( el ) {
+                        el.style.display = el._nav.orig_display;
                     } else {
-                        throw new Error( "Nav2: No page with name " + page );
+                        throw new Error( "Nav2: No page with name " + pg );
                     }
                 }
             };
@@ -1798,6 +1817,7 @@ IN THE SOFTWARE.
 
 		// Ties a Javascript object to some user interface elements in the browser DOM.
 		// If anything changes in the data object then mod_cb is called.
+		// XXX Not great. Don't recommend using this
 		M.MXU = function( base, data, mod_cb ) {
 
 			const form_types = "input select textarea".toUpperCase().split( " " );
@@ -1949,9 +1969,6 @@ IN THE SOFTWARE.
 			}
 			img.src = image_data_url;
 		};
-
-
-		M.globalize = function(){};
 
 	}
 

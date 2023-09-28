@@ -280,15 +280,17 @@ runp( runp_this )
 })
 
 
-throwIf( is_file( "./lasdflkasjer" ) !== false );
-throwIf( is_dir( "./lasdflkasjer" ) !== false );
-throwIf( is_file( "./test.js" ) !== true );
-throwIf( is_dir( "." ) !== true );
+if( isNode ) {
+	throwIf( is_file( "./lasdflkasjer" ) !== false );
+	throwIf( is_dir( "./lasdflkasjer" ) !== false );
+	throwIf( is_file( "./test.js" ) !== true );
+	throwIf( is_dir( "." ) !== true );
 
-is_file( "./lasdflkasjer", b => { throwIf( b !== false ) } )
-is_dir( "./lasdflkasjer", b => { throwIf( b !== false ) } )
-is_file( "./test.js", b => { throwIf( b !== true ) } )
-is_dir( ".", b => { throwIf( b !== true ) } )
+	is_file( "./lasdflkasjer", b => { throwIf( b !== false ) } )
+	is_dir( "./lasdflkasjer", b => { throwIf( b !== false ) } )
+	is_file( "./test.js", b => { throwIf( b !== true ) } )
+	is_dir( ".", b => { throwIf( b !== true ) } )
+}
 
 
 
