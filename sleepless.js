@@ -1973,18 +1973,6 @@ IN THE SOFTWARE.
 	}
 
 
-	// New suggest usage:
-	//	node:
-	//		const { rpc, log5, toInt } = require( "sleepless" );
-	//	browser:
-	//		const { rpc, log5, toInt } = sleepless;
-	/*
-	let g = isBrowser ? window : global;
-	for( let k in M ) {
-		g[ k ] = M[ k ];
-	}
-	*/
-
 	if(isNode) {
 		module.exports = M;
 	} else {
