@@ -24,7 +24,7 @@ IN THE SOFTWARE.
 
 */
 
-
+(function() {
 
 	let M = {};
 
@@ -51,7 +51,7 @@ IN THE SOFTWARE.
 	M.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 
 	// convert and return object as JSON or null if exception
-	M.o2j = function(v, r, s) { try { return JSON.stringify(v, r, s) } catch(e) { return null } }
+	M.o2j = function(o) { try { return JSON.stringify(o) } catch(e) { return null } }
 
 
 	// convert whatever to float or 0 if not at all numberlike
@@ -261,7 +261,7 @@ IN THE SOFTWARE.
 		return M.dt2ts(M.us2dt(us, utc));
 	}
 
-	// Convert Unix timestamp to "MM/DD/YYYY HH:MM:SS" or "" if ts is 0
+	// Convert Unix timestamp to "MM/DD/YYYY HH:MM:SS".
 	M.ts2us = function(ts) {
 		var d = M.ts2dt(ts);
 		if(!d) {
@@ -282,45 +282,42 @@ IN THE SOFTWARE.
 			"";
 	}
 
-	// Convert Unix timestamp to "MM/DD" or "" if ts is 0
+	// Convert Unix timestamp to "MM/DD".
 	M.ts2us_md = function(ts) {
 		return M.ts2us(ts).substr(0, 5);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YYYY" or "" if ts is 0
+	// Convert Unix timestamp to "MM/DD/YYYY".
 	M.ts2us_mdy = function(ts) {
 		return M.ts2us(ts).substr(0, 10);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YY" or "" if ts is 0
+	// Convert Unix timestamp to "MM/DD/YY"
 	M.ts2us_mdy2 = function(ts) {
-        let us = M.ts2us_mdy(ts);
-        if( us != "" ) {
-            var a = us.split("/");
-            a[2] = a[2].substr(2);
-            us = a.join("/");
-        }
-        return us;
+		var a = M.ts2us_mdy(ts).split("/");
+		if(a.length != 3) {
+			return a;
+		}
+		a[2] = a[2].substr(2);
+		return a.join("/");
 	}
 
-	// Convert Unix timestamp to "HH:MM" or "" if ts is 0
+	// Convert Unix timestamp to "HH:MM"
 	M.ts2us_hm = function(ts) {
 		return M.ts2us(ts).substr(11, 5);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YYYY HH:MM" or "" if ts is 0
+	// Convert Unix timestamp to "MM/DD/YYYY HH:MM"
 	M.ts2us_mdyhm = function(ts) {
-        let s = M.ts2us_mdy(ts) + " " + M.ts2us_hm(ts);
-		return s != " " ? s : "" ;
+		return M.ts2us_mdy(ts) + " " + M.ts2us_hm(ts);
 	}
 
-	// Convert Unix timestamp to "MM/DD/YY HH:MM" or "" if ts is 0
+	// Convert Unix timestamp to "MM/DD/YY HH:MM"
 	M.ts2us_mdy2hm = function(ts) {
-        let s = M.ts2us_mdy2(ts) + " " + M.ts2us_hm(ts);
-		return s != " " ? s : "" ;
+		return M.ts2us_mdy2(ts) + " " + M.ts2us_hm(ts);
 	}
 
-	// Convert Unix timestamp to something like "01-Jan-2016" or "" if ts is 0
+	// Convert Unix timestamp to something like "01-Jan-2016"
 	M.ts2us_dMy = function(ts) {
 		var d = M.ts2dt(ts);
 		if(!d) {
@@ -482,179 +479,146 @@ IN THE SOFTWARE.
 	}
 
 	
-	// Run some functions in parallel / simultaneously
-	// runp() (no args) is DEPRECATED
-	M.runp = function( a_this, ...args ) {
+	/*
+	Run some functions in parallel, e.g:
 
-		const legacy_runp = function() {
-			var o = {};
-			var q = [];
-			var add = function add() {
-				let args = Array.prototype.slice.call(arguments);
-				if( typeof args[ 0 ] === "function" ) {
-					q.push( args );
-					return o;
-				}
-				let arr = args.shift();
-				let fun = args.shift();
-				arr.forEach( x => {
-					q.push( [ fun, x ].concat( args ) );
-				});
+		runp()						// create a runner object
+
+		.add(function(cb) {			// add a simple function that does something
+			// do something.
+			cb();	// call this when it's done
+		})
+
+		.add(function(cb, str) {	// pass in an argument and also return an error
+			// str == "foo"
+			cb("error "+str);
+		}, "foo")
+
+		.add(function(cb, str1, str2) {		// pass in multiple args
+			// str1 == "bar", str2 = "baz"
+			cb(null, "okay "+str1+" "+str2);
+		}, "bar", "baz")
+
+		.add( [ 7, 11 ], function( cb, num, str ) {		// call the func once for each item in an array
+			// this function called twice once with num = 7 and once with num = 11
+			// both times str = "qux"
+			cb(null, "okay "+num+" "+str);
+		}, "qux")
+
+		// All the calls are set up but nothing happens until
+		// I call run() on the runner object, at which point all the functions
+		// will be fired off in parallel.  When they're all completed (okay or fail)
+		// the the call back calls you with an array of errors and results.
+
+		.run(function(errors, results) {
+			// all the functions have completed
+			// errors = [null, "error foo", null, null, null ];
+			// results = [null, null, "okay bar baz", "okay 7 qux", "okay 11 qux" ];
+		})
+	*/
+	M.runp = function() {
+		var o = {};
+		var q = [];
+
+		// Adds a function to the runp object
+		var add = function add() {
+			let args = Array.prototype.slice.call(arguments);
+			if( typeof args[ 0 ] === "function" ) {
+				q.push( args );
 				return o;
-			};
-			var run = function(cb) {
-				var errors = [];
-				var results = [];
-				var num_done = 0;
-				if( q.length == 0 ) {
-					if(cb) {
-						cb(errors, results);
-					}
-					return;
-				}
-				q.forEach(function(args, i) {
-					let fun = args.shift();
-					args.unshift( function(e, r) {
-						errors[i] = e || null;
-						results[i] = r || null;
-						num_done += 1;
-						if(num_done == q.length) {
-							if(cb) {
-								cb(errors, results);
-							}
-						}
-					} );
-					fun.apply( null, args );
-				});
-			};
-			o.add = add;
-			o.run = run;
+			}
+			// assume it's an array and and 2nd arg is function
+			let arr = args.shift();
+			let fun = args.shift();
+			arr.forEach( x => {
+				q.push( [ fun, x ].concat( args ) );
+			});
 			return o;
 		};
 
-		if( a_this === undefined && args.length == 0 ) {
-			return legacy_runp(); // revert to old behavior
-		}
-
-		const calls = [];
-
-		// Add a call 
-		const add = function( fun, ...args ) {
-			calls.push( { fun, args } );
-			return me;
-		}
-
-		const run = function( done ) {
-
-			const results = [];
-			let num_done = 0;
-
-			// advance the num_done count, then if we're finished, call done()
-			const one_done = function() {
-				num_done += 1;
-				if( num_done == calls.length )
-					done( results );
-			};
-
-			// step through all the calls and fire them off
-			calls.forEach( ( next, i ) => {
-				const { fun, args } = next;	// dereference function and args
-				// append okay, fail funcs to args
-				args.push( function( data ) {
-					results[ i ] = { data };	// store data in results and advance done count
-					one_done();
-				} );
-				args.push( function( error ) {
-					results[ i ] = { error };	// store error in results and advance done count
-					one_done();
-				} );
-				fun.apply( a_this, args );	// call the function with the remaining array elements as args
-
-			} );
-
-			return me;
-		}
-
-		const me = { add, run };
-
-		return me;
-
-	};
-
-
-	// Run some functions sequentially / synchronously ( see test.js )
-	// runq() (no args) is DEPRECATED
-	M.runq = function( a_this, ...args ) {
-
-		// This is the old original version
-		const legacy_runq = function() {
-			var o = {};
-			var q = []
-			var add = function(f) {
-				q.push(f);
-				return o;
-			};
-			var run = function(cb, arg) {
-				if(q.length == 0) {
-					cb(null, arg);
-					return;
+		// Starts all the functions at once
+		var run = function(cb) {
+			var errors = [];
+			var results = [];
+			var num_done = 0;
+			if( q.length == 0 ) {
+				if(cb) {
+					cb(errors, results);
 				}
-				var f = q.shift();
-				f(function(e, arg) {
-					if(e) {
-						q = [];
-						cb(e, arg);
+				return;
+			}
+			q.forEach(function(args, i) {
+				let fun = args.shift();
+				// Call each function with a callback and an index # (0-based)
+				// The callback expect err, and result arguments.
+				args.unshift( function(e, r) {
+					// One of the functions is finished
+					errors[i] = e || null;
+					results[i] = r || null;
+					num_done += 1;
+					// when all finished, call the cb that was passed into run() with 
+					// a list of errors and results.
+					if(num_done == q.length) {
+						if(cb) {
+							cb(errors, results);
+						}
 					}
-					else {
-						run(cb, arg);
-					}
-				}, arg);
-			};
-			o.add = add
-			o.run = run
-			return o
+				} );
+				fun.apply( null, args );
+			});
 		};
-		if( a_this === undefined && args.length == 0 ) {
-			return legacy_runq(); // revert to old behavior
-		}
 
-		const queue = [];		// holds the queued calls
-		const results = [];		// collects the results from each call
+		o.add = add;
+		o.run = run;
+		return o;
+	}
 
-		// Add a call to the queue
-		const add = function( fun, ...args ) {
-			queue.push( { fun, args } );
-			return me;
-		}
-
-		// starts the queue running
-		const run = function( _okay, _fail ) {
-			const call_one = function() {
-				const next = queue.shift();	// get next call from queue, which is an array
-				if( ! next ) {
-					// queue empty; all done
-					_okay( results );
-					return;
+	/*
+	Run a queue of functions sequentially, e.g:
+		runq()
+		.add(function(cb, a) {
+			cb(null, a + 1);
+		})
+		.add(function(cb, a) {
+			cb(null, a + 1);
+		})
+		.run(function(err, r) {
+			// all done
+			if(err) {
+				// ...
+			}
+			else {
+				console.log(a);		// 3
+			}
+		}, 1)
+	*/
+	M.runq = function() {
+		var o = {};
+		var q = []
+		var add = function(f) {
+			q.push(f);
+			return o;
+		};
+		var run = function(cb, arg) {
+			if(q.length == 0) {
+				cb(null, arg);
+				return;
+			}
+			var f = q.shift();
+			f(function(e, arg) {
+				if(e) {
+					q = [];
+					cb(e, arg);
 				}
-				const { fun, args } = next;	// dereference function and args
-				// append okay and fail args
-				args.push( function( data ) {
-					results.push( data );	// store the returned results
-					setTimeout( call_one, 1 );	// move on to the next call
-				} );
-				args.push( function( error ) {
-					_fail( error );		// call the _fail function; nothing else happens
-				} );
-				fun.apply( a_this, args );	// call the function with the remaining array elements as args
-			};
-			call_one();
-			return me;
-		}
-
-		const me = { add, run };
-
-		return me;
-	};
+				else {
+					run(cb, arg);
+				}
+			}, arg);
+		};
+		o.add = add
+		o.run = run
+		return o
+	}
 
 
 	// Sort of like Markdown, but not really.
@@ -668,36 +632,23 @@ IN THE SOFTWARE.
 
 		// append/prepend a couple newlines so that regexps below will match at beginning and end
 		t = "\n\n" + t + "\n\n";		// note: will cause a <p> to always appear at start of output
-		// DEPRECATE - old style
+
 		// hyper link/anchor
 		// (link url)
 		// (link url alt_display_text)
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*\)/gi, "<a href=\"$1\">$1</a>");
 		t = t.replace(/\(\s*link\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a href=\"$1\">$2</a>");
 
-		// DEPRECATE - old style
 		// hyper link/anchor that opens in new window/tab
 		// (xlink url)
 		// (xlink url alt_display_text)
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*\)/gi, "<a target=_blank href=\"$1\">$1</a>");
 		t = t.replace(/\(\s*xlink\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<a target=_blank href=\"$1\">$2</a>");
 
-		// DEPRECATE - old style
 		// image
 		// (image src title)
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*\)/gi, "<img src=\"$1\">");
 		t = t.replace(/\(\s*image\s+([^\s\)]+)\s*([^\)]+)\)/gi, "<img src=\"$1\" title=\"$2\">");
-
-
-		// hyper link/anchor
-		t = t.replace( /\^\^\s*([^\s]*)\s*\^\^/gi, "^$1 $1^" );
-		t = t.replace( /\^\^\s*([^\s]*)\s+([^\^]+)\^\^/gi, "<a target=_blank href=\"$1\">$2</a>" );
-		t = t.replace( /\^\s*([^\s]*)\s*\^/gi, "^$1 $1^" );
-		t = t.replace( /\^\s*([^\s]*)\s+([^\^]+)\^/gi, "<a href=\"$1\">$2</a>" );
-
-		// image
-		t = t.replace(/\|\s*([^\s\)]+)\s*\|/gi, "(image $1 $1)");
-		t = t.replace(/\|\s*([^\s\)]+)\s*([^\)]+)\|/gi, "<img src=\"$1\" title=\"$2\">");
 
 		// figure
 		// (figure src caption)
@@ -713,8 +664,8 @@ IN THE SOFTWARE.
 		t = t.replace(/\(tm\)/gi, "&trade;");	
 		t = t.replace(/\(r\)/gi, "&reg;");	
 		t = t.replace(/\(c\)/gi, "&copy;");
-		//t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
-		//t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
+		t = t.replace(/\(cy\)/gi, "&copy;&nbsp;"+(new Date().getFullYear()));
+		t = t.replace(/\(cm\s([^)]+)\)/gi, "&copy;&nbsp;"+(new Date().getFullYear())+"&nbsp;$1&nbsp;&ndash;&nbsp;All&nbsp;Rights&nbsp;Reserved" )
 
 		// one or more blank lines mark a paragraph
 		t = t.replace(/\n\n+/gi, "\n\n<p>\n");
@@ -778,7 +729,7 @@ IN THE SOFTWARE.
 		// # item 2
 		// 1. item 3
 		t = t.replace(/\n((\s*(\d+|#)\.?\s+[^\n]+\n)+)/gi, "\n<ol>\n$1\n</ol>");
-		t = t.replace(/\n\s*(\d+|#)\.?\s+([^\n]+)/gi, "\n<li>$2</li>");
+		t = t.replace(/\n(\d+|#)\.?\s+([^\n]+)/gi, "\n<li>$2</li>");
 
 		// Horiz. rule
 		// ---- (4 or more dashes)
@@ -803,7 +754,12 @@ IN THE SOFTWARE.
 
 	// The inimitable Log5 ...
 	(function() {
+		var util = null;
 		var style = null;
+		if( isNode ) {
+			util = require( "util" );
+			// style = require( "./ansi-styles.js" );
+		}
 		const n0 = function(n) {
 			if(n >= 0 && n < 10)
 				return "0"+n
@@ -845,11 +801,11 @@ IN THE SOFTWARE.
 						x = "undefined";
 					}
 					if( typeof x === "object" ) {	// if arg is an object ...
-						// FIXME if( isNode ) {				// and we're in node ...
-						// FIXME	x = util.inspect( x, { depth: 10 } );	// convert obj to formatted JSON
-						// FIXME} else {					// otherwise ...
-							x = M.o2j( x );			// just convert obj to JSON
-						// FIXME}
+						if( isNode ) {				// and we're in node ...
+							x = util.inspect( x, { depth: 10 } );	// convert obj to formatted JSON
+						} else {					// otherwise ...
+							x = o2j( x );			// just convert obj to JSON
+						}
 					}
 					s += x;					// append to the growing string
 				}
@@ -896,95 +852,37 @@ IN THE SOFTWARE.
 	})();
 
 
-	// Make all the sleepless functions/objects into globals (if you feel you must, and I often do)
-	M.globalize = function() {
-		for( const k in M ) {
-			globalThis[ k ] = M[ k ];
-		}
-	};
-
-
-	if( isNode ) {
-
+	if(isNode) {
 		// Node.js only stuff
-
-		// FIXME const fs = require("fs");
-		// FIXME const crypto = require("crypto");
-		// FIXME const https = require("https");
 
 		// Read a file from disk
 		// Reads async if callback cb is provided,
 		// otherwise reads and returns contents synchronously.
-		M.get_file = function(path, enc, cb) {
+		M.getFile = function(path, enc, cb) {
+			var fs = require("fs");
 			if(!cb) {
 				return fs.readFileSync(path, enc);
 			}
 			fs.readFile(path, enc, cb);
 		};
 
-		// DEPRECATE in favor of get_file();
-		M.getFile = M.get_file;
-
-
-		// get fs stat object
-		// if cb provided, do it asyncrhonously and call cb
-		// returns fs.Stats object or null if error (ENOENT)
-		M.file_info = function( path, cb ) {
-			let st = null;
-			if( ! cb ) {
-				// do synchronously
-				st = fs.statSync( path, { throwIfNoEntry: false } );
-				return st;
-			}
-			// do async 
-			fs.stat( path, ( error, st ) => {
-				if( error )
-					cb( null );
-				else
-					cb( st );
-			} );
-		};
-
-		M.is_file = function( path, cb ) {
-			if( ! cb ) {
-				let st = M.file_info( path );
-				return st ? st.isFile() : false;
-			}
-			M.file_info( path, st => {
-				cb( st ? st.isFile() : false );
-			} );
-		};
-
-		M.is_dir = function( path, cb ) {
-			if( ! cb ) {
-				let st = M.file_info( path );
-				return st ? st.isDirectory() : false;
-			}
-			M.file_info( path, st => {
-				cb( st ? st.isDirectory() : false );
-			} );
-		};
-
 		// Return ASCII sha1 for a string
 		M.sha1 = function(s) {
-			var h = crypto.createHash("sha1");
+			var h = require("crypto").createHash("sha1");
 			h.update(s);
 			return h.digest("hex");
 		};
 
 		// Return ASCII sha256 for a string
 		M.sha256 = function(s) {
-			var h = crypto.createHash("sha256");
+			var h = require("crypto").createHash("sha256");
 			h.update(s);
 			return h.digest("hex");
 		};
 
-		M.rand_hash = function( salt = "" ) {
-			return M.sha1( salt + ( Date.now() + M.time() ) );
-		};
-
 		// DS (datastore)
 		(function() {
+			const fs = require( "fs" );
 			const load = function( f ) {
 				const self = this;
 				f = f || self.file;
@@ -1002,7 +900,7 @@ IN THE SOFTWARE.
 				const self = this;
 				f = f || self.file;
 				self.__proto__.file = f;
-				fs.writeFileSync( f, JSON.stringify( self, null, 4 ) );
+				fs.writeFileSync( f, JSON.stringify( self ) );
 			}
 			const clear = function() {
 				const self = this;
@@ -1027,7 +925,25 @@ IN THE SOFTWARE.
 
 
 		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false, _redirects = 0 ) {
-			if( _get ) {	// if using GET ...
+
+			let method = _get ? "GET" : "POST";
+			let headers = {
+				"Accept": "application/json",
+			}
+
+			if( typeof url === "object" ) {
+				let opts = url;
+				if( opts.method ) 
+					method = opts.method;
+				if( opts.headers )
+					headers = opts.method;
+			}
+
+			if( ! url )
+				return fail( "Invalid URL" );
+
+
+			if( method !== "POST" ) {
 				// add the data to the URL as query args
 				let arr = [];
 				for( let k in data ) {
@@ -1037,13 +953,13 @@ IN THE SOFTWARE.
 					url += "?" + arr.join( "&" );
 				}
 			}
+
 			// check for looping
 			_redirects = M.toInt( _redirects );
-			if( _redirects > 10 ) {
-				fail( "Too many redirects" ); // methinks we loopeth
-				return;
-			}
-			const method = _get ? "GET" : "POST";
+			if( _redirects > 10 )
+				return fail( "Too many redirects" ); // methinks we loopeth
+	
+			//const method = _get ? "GET" : "POST";
 			let opts = {
 				method: method,
 				headers: {
@@ -1054,7 +970,7 @@ IN THE SOFTWARE.
 			if( method != "GET" )
 				opts.headers[ "Content-Type" ] = "application/json";
 			let json = "";	// collected response
-			let req = https.request( url, opts, res => {
+			let req = require( "https" ).request( url, opts, res => {
 				res.setEncoding( "utf8" );
 				res.on( "data", chunk => { json += chunk; } );
 				res.on( "end", () => {
@@ -1079,71 +995,7 @@ IN THE SOFTWARE.
 				});
 			});
 			req.on( "error", fail );
-			req.write( _get ? "" : M.o2j( data ) );
-			req.end();
-		};
-
-
-		M.rpc2 = function( url, opts, data, okay = ()=>{}, fail = ()=>{}, _redirects = 0 ) {
-
-			// check for looping
-			_redirects = M.toInt( _redirects );
-			if( _redirects > 10 )
-				return fail( "Too many redirects" ); // methinks we loopeth
-
-			if( ! opts.method )
-				opts.method = "POST";
-			if( ! opts.headers )
-				opts.headers = {};
-
-			if( opts.method.toUpperCase() == "POST" ) {
-				// set content-type for POST requests
-				opts.headers[ "Content-Type" ] = "application/json";
-			} else {
-				// add data to the URL as query args for non-POST requests
-				let arr = [];
-				for( let k in data ) {
-					arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
-				}
-				if( arr.length > 0 ) {
-					url += "?" + arr.join( "&" );
-				}
-				data = null;
-			}
-
-			let json = "";	// collected response
-			let req = https.request( url, opts, res => {
-				res.setEncoding( "utf8" );
-				res.on( "data", chunk => { json += chunk; } );
-				res.on( "end", () => {
-					let { statusCode, headers } = res;
-					if( statusCode >= 200  && statusCode < 300 ) {
-						// it's an "okay"
-						// XXX make this tolerate an empty response
-						let r = M.j2o( json );
-						if( ! r )
-							return fail( "Error parsing response from server." );
-						//return okay( r, res );
-						if( r.error ) {
-							return fail( r.error );
-						}
-						return okay( r.data, res );		// done!
-					} else {
-						if( statusCode >= 300 && statusCode < 400 ) {
-							// it's a redirect ...
-							// get new url
-							let url = headers[ "location" ] || headers[ "Location" ];
-							// recursively try the new location
-							M.rpc2( url, opts, data, okay, fail, _get, _redirects + 1 );
-						} else {
-							// not a redirect so fail
-							return fail( "HTTP Error "+statusCode, json, req );
-						}
-					}
-				});
-			});
-			req.on( "error", fail );
-			req.write( data ? M.o2j( data ) : "" );
+			req.write( _get ? "" : o2j( data ) );
 			req.end();
 		};
 
@@ -1151,8 +1003,7 @@ IN THE SOFTWARE.
 		// This is a connect/express middleware that creates okay()/fail() functions on the response
 		// object for responding to an HTTP request with a JSON payload.
 		// XXX This may not really belong in sleepless.js
-		// DEPRECATE and remove
-		/*M.mw_fin_json = function( req, res, next ) {
+		M.mw_fin_json = function( req, res, next ) {
 			res.done = ( error, data ) => {
 				let json = JSON.stringify( { error, data } );
 				res.writeHead( 200, { "Content-Type": "application/json", });
@@ -1162,7 +1013,7 @@ IN THE SOFTWARE.
 			res.fail = ( error, body ) => { res.done( error, body ); };
 			res.okay = ( data ) => { res.done( null, data ); };
 			next();
-		};*/
+		};
 
 	} else {
 		// Browser only stuff
@@ -1171,13 +1022,13 @@ IN THE SOFTWARE.
 			// XXX Add ttl feature
 			get: function( k ) {
 				try {
-					return M.j2o( localStorage.getItem( k ) );
+					return j2o( localStorage.getItem( k ) );
 				} catch( e ) { }
 				return null;
 			},
 			set: function( k, v ) {
 				try {
-					return localStorage.setItem( k, M.o2j( v ) );
+					return localStorage.setItem( k, o2j( v ) );
 				} catch( e ) { }
 				return null;
 			},
@@ -1194,16 +1045,12 @@ IN THE SOFTWARE.
 
 
 		// Make an async HTTP GET request for a URL
-		M.get_file = function(url, cb) {
+		M.getFile = function(url, cb) {
 			var x = new XMLHttpRequest();
 			x.onload = function() { cb(x.responseText, x); };
 			x.open("GET", url);
 			x.send();
 		};
-
-		// DEPRECATE in favor of get_file();
-		M.getFile = M.get_file;
-
 
 		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false ) {
 			if( _get ) {	// if using GET ...
@@ -1240,48 +1087,9 @@ IN THE SOFTWARE.
 			}
 		};
 
-		M.rpc2 = function( url, opts, data, okay = ()=>{}, fail = ()=>{}, _redirects = 0 ) {
-			let method = opts.method ? opts.method.ucase() : "POST";
-            let headers = opts.headers ? opts.headers : {};
-			if( method == "GET" ) {	// if using GET ...
-				// add the data to the URL as query args
-				let arr = [];
-				for( let k in data ) {
-					arr.push( encodeURIComponent( k ) + "=" + encodeURIComponent( data[ k ] ) );
-				}
-				if( arr.length > 0 ) {
-					url += "?" + arr.join( "&" );
-				}
-			}
-			let xhr = new XMLHttpRequest();
-			xhr.onload = function() {
-				let r = M.j2o( xhr.responseText );
-				if( ! r ) {
-					return fail( "Error parsing response from server." );
-				}
-				if( r.error ) {
-					return fail( r.error );
-				}
-				okay( r.data, xhr );
-			};
-			xhr.onerror = fail;
-			xhr.open( method, url );
-			if( method != "GET" )
-				xhr.setRequestHeader( "Content-Type", "application/json" );
-			xhr.setRequestHeader( "Accept", "application/json" );
-            for( let k in opts.headers ) {
-                xhr.setRequestHeader( k, opts.headers[ k ] );
-            }
-			if( method != "GET" && data ) {
-				xhr.send( M.o2j( data ) );
-			} else {
-				xhr.send();
-			}
-		};
-
 
 		// Returns an object constructed from the current page's query args.
-		M.query_data = function() {
+		M.getQueryData = function() {
 			var o = {};
 			var s = document.location.search;
 			if(s) {
@@ -1292,20 +1100,6 @@ IN THE SOFTWARE.
 				}
 			}
 			return o
-		};
-
-		// DEPRECATE in favor of query_data()
-		M.getQueryData = M.query_data;
-
-
-		// Return all elements matching query selector as an array
-		M.QS = function( qs ) {
-			return document.querySelectorAll( qs ).toArray();
-		};
-
-		// Return first element matching query selector
-		M.QS1 = function( qs ) {
-			return M.QS( qs )[ 0 ];
 		};
 
 
@@ -1341,35 +1135,15 @@ IN THE SOFTWARE.
 			return this;
 		};
 
-        // Remember original display, then set display to 'none'
-        HTMLElement.prototype.hide = function() {
-            if( this.style._orig_display === undefined )
-                this.style._orig_display = this.style.display;
-            this.style.display = "none";
-            return this;
-        };
+		// Return all elements matching query selector as an array
+		M.QS = function( qs ) {
+			return document.querySelectorAll( qs ).toArray();
+		};
 
-        // If original display was remembered, set display to that
-        // Note unhide() is not exactly the same as show()
-        HTMLElement.prototype.unhide = function() {
-            if( this.style._orig_display !== undefined )
-                this.style.display = this.style._orig_display;
-            return this;
-        };
-
-
-        // Remember original display, then set display to 'inherit'
-        HTMLElement.prototype.show = function() {
-            if( this.style._orig_display === undefined )
-                this.style._orig_display = this.style.display;
-            this.style.display = "inherit";
-            return this;
-        }
-
-        // If original display was remembered, set display to that
-        // Note unshow() is not exactly the same as hide()
-        HTMLElement.prototype.unshow = HTMLElement.prototype.unhide;
-
+		// Return first element matching query selector
+		M.QS1 = function( qs ) {
+			return M.QS( qs )[ 0 ];
+		};
 
 		// Find all child elements matching query selector
 		HTMLElement.prototype.find = function( qs ) {
@@ -1379,14 +1153,6 @@ IN THE SOFTWARE.
 		// Find first child element matching query selector
 		HTMLElement.prototype.find1 = function( qs ) {
 			return this.find( qs )[ 0 ];
-		}
-
-		HTMLElement.prototype.findNamed = function( name ) {
-			return this.find( "[name="+name+"]" );
-		}
-
-		HTMLElement.prototype.findNamed1 = function( name ) {
-			return this.findNamed( name )[ 0 ];
 		}
 
 		// Get (or set if v is provided) an attribute's value
@@ -1401,27 +1167,15 @@ IN THE SOFTWARE.
 		};
 
 		// Get (or set if v is provided) an element's value
-		HTMLElement.prototype.val = function(v, chg = false) {
+		HTMLElement.prototype.val = function(v) {
 			if(v !== undefined) {
 				this.value = v;
-                if( chg ) {
-                    // fire a change event
-                    const evt = new Event( "change" );
-                    this.dispatchEvent( evt );
-                }
 				return this;
 			}
 			else {
 				return (this.value || "").trim();
 			}
 		};
-
-        // fire a change event on an element
-        HTMLElement.prototype.change = function() {
-            const evt = new Event( "change" );
-            this.dispatchEvent( evt );
-            return this;
-        };
 
 		// Get (or set if h is provided) an element's innerHTML
 		HTMLElement.prototype.html = function(h) {
@@ -1493,6 +1247,8 @@ IN THE SOFTWARE.
 				}
 			}
 		};
+
+
 
 
 		// ---------------------------------------
@@ -1713,106 +1469,9 @@ IN THE SOFTWARE.
 			Nav.current_show(data);
 		};
 
-		// Lets you navigate through pseudo-pages within an actual page
-		// without any actual document fetching from the server.
-        // Nav( data_object )
-        // Nav( data_object, show_function )
-        // Nav( show_function )
-		M.Nav2 = function( data, new_show ) {
-
-			if( typeof data === "function" ) {
-				new_show = data;
-				data = null;
-			}
-
-			if( ! data ) {
-				// no data object passed in; use current query data 
-				//data = {};
-				//const a = document.location.search.split( /[?&]/ );	
-				//a.shift();
-				//a.forEach( function( kv ) {
-				//	var p = kv.split( "=" );
-				//	data[ p[ 0 ] ] = ( p.length > 1 ) ? decodeURIComponent( p[ 1 ] ) : "";
-				//})
-				data = query_data();
-			}
-
-			var state = { pageYOffset: 0, data };
-
-			// build URL + query-string from current path and contents of 'data'
-			let qs = "";
-			for( let k in data ) {
-				qs += (qs ? "&" : "?") + k + "=" + encodeURIComponent(data[k]);
-			}
-			const url = document.location.pathname + qs;
-
-			// if browser doesn't support pushstate, just redirect to the url
-			if( history.pushState === undefined ) {
-				document.location = url;
-				return;
-			}
-
-            M.Nav2.default_show = function( data ) {
-                if( data[ "page" ] !== undefined ) {
-                    // hide all elements with class "page" by setting
-                    // css display to "none"
-                    const pages = M.QS( "page" );
-                    for( let p of pages ) {
-                        if( p._nav === undefined ) {
-                            p._nav = {};
-                            p._nav.orig_display = p.style.display;
-                        }
-                        p.style.display = "none";
-                    }
-                    // jump to top of document
-                    document.body.scrollIntoView();
-                    // show the new page
-					const pg = data.page;
-                    const el = QS1( "page[name=" + pg + "]" );
-                    if( el ) {
-                        el.style.display = el._nav.orig_display;
-                    } else {
-                        throw new Error( "Nav2: No page with name " + pg );
-                    }
-                }
-            };
-
-			if( ! Nav2.current_show ) {
-				// 1st time Nav2() has been called
-
-				// Set up the built-in default show function
-				Nav2.current_show = Nav2.default_show;
-
-				if( history.replaceState !== undefined ) {
-					// set state for the current/initial location
-					history.replaceState( state, "", url );
-					// wire in the pop handler
-					window.onpopstate = function( evt ) {
-						if( evt.state ) {
-							const data = evt.state;
-							Nav2.current_show( evt.state.data );
-						}
-					}
-				}
-
-			} else {
-				// this is 2nd or later call to Nav2()
-				state.pageYOffset = window.pageYOffset;
-				history.pushState( state, "", url );
-			}
-
-			// if new show func supplied, start using that one
-			if( new_show ) {
-				Nav2.current_show = new_show;
-			}
-
-			Nav2.current_show( data );
-		};
-
 
 		// Ties a Javascript object to some user interface elements in the browser DOM.
 		// If anything changes in the data object then mod_cb is called.
-		// XXX Not great. Don't recommend using this
 		M.MXU = function( base, data, mod_cb ) {
 
 			const form_types = "input select textarea".toUpperCase().split( " " );
@@ -1965,8 +1624,17 @@ IN THE SOFTWARE.
 			img.src = image_data_url;
 		};
 
+
+		M.globalize = function(){};
+
 	}
 
+
+	// Tire of constantly calling this ... just globalizing everything
+	let g = isBrowser ? window : global;
+	for( let k in M ) {
+		g[ k ] = M[ k ];
+	}
 
 	if(isNode) {
 		module.exports = M;
@@ -1975,6 +1643,4 @@ IN THE SOFTWARE.
 	}
 
 
-export default M;
-
-
+})();
