@@ -3,14 +3,11 @@ let isBrowser = typeof global === "undefined";
 let isNode = ! isBrowser;
 
 var l = console.log
-const sleepless = require("./sleepless.js")
-// globalize
-for(k in sleepless) {
-    globalThis[k] = sleepless[k]
-}
+import sleepless from "./sleepless.js";
+sleepless.globalize();
 
-o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
-j = JSON.stringify(o);
+const o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
+const j = JSON.stringify(o);
 
 throwIf( o2j(o) !== j );
 throwIf( o2j(j2o(j)) !== j );
@@ -141,7 +138,7 @@ throwIf( "a@b.cd".is_email() !== true );
 throwIf( "aaaaaaaaaaaaaaaaaaaa-_12.aaaa@bbbbbb.cccccccc.dddddddddddddddd".is_email() !== true );
 throwIf( "joe.sleepless.com".is_email() !== false );
 
-Thing = function() {
+const Thing = function() {
 	this.name = "Mr. Thing";
 }
 
@@ -172,7 +169,7 @@ if( isBrowser ) {
 
 }
 
-test = function(logger) {
+let test = function(logger) {
 	for(var i = 0; i < 6; i++) {
 		console.log( "---- level "+i+" ----" );
 
@@ -199,7 +196,7 @@ if( isNode ) {
 	let ds = new DS( "test.json" );
 	ds.bar = 7;
 	ds.save();
-	ds2 = new DS( "test.json" );
+	let ds2 = new DS( "test.json" );
 	throwIf( ds2.bar !== 7 );
 }
 
