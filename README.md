@@ -19,7 +19,9 @@ via this path:
 	<script src="sleepless.mjs" type="module"></script>
 
 
-### Node.js
+### Node
 
-	import sleepless from "./sleepless.js";
+	import sleepless from "./sleepless.mjs";
+    sleepless.globalize();
+    log( sleepless );
 
