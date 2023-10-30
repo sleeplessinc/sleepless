@@ -39,6 +39,7 @@ M.log = function(m) {
 	}
 	return console.log(m);
 }
+    M.logg = M.log;
 
 
 // throw an error if a condition is true
@@ -1968,7 +1969,6 @@ M.globalize = function() {
 		globalThis[ k ] = M[ k ];
 	}
 };
-
 
 
 export default M;

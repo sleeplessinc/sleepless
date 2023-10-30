@@ -42,7 +42,6 @@ IN THE SOFTWARE.
 		return console.log(m);
 	}
 
-
 	// throw an error if a condition is true
 	M.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
 
