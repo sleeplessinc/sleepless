@@ -905,6 +905,7 @@ IN THE SOFTWARE.
 		for( const k in M ) {
 			globalThis[ k ] = M[ k ];
 		}
+        return M;
 	};
 
 
@@ -1285,7 +1286,7 @@ IN THE SOFTWARE.
 
 
 		// Returns an object constructed from the current page's query args.
-		M.query_data = function() {
+		M.query_data = function( key ) {
 			var o = {};
 			var s = document.location.search;
 			if(s) {
@@ -1295,6 +1296,8 @@ IN THE SOFTWARE.
 					o[aa[0]] = decodeURIComponent(aa[1]);
 				}
 			}
+            if( key !== undefined && typeof key === "string" )
+                return o[ key ];
 			return o
 		};
 

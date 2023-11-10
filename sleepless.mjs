@@ -26,8 +26,9 @@ IN THE SOFTWARE.
 
 const M = {};
 
-let isBrowser = typeof global === "undefined";
-let isNode = ! isBrowser;
+const isNode = typeof process === "object";
+const isDeno = typeof Deno === "object";
+const isBrowser = ! ( isNode || isDeno );
 
 // for convenience
 M.log = function(m) {
@@ -1159,7 +1160,9 @@ if( isNode ) {
 		next();
 	};*/
 
-} else {
+}
+
+if( isBrowser ) {
 	// Browser only stuff
 
 	M.LS = {
