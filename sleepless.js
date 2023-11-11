@@ -800,7 +800,9 @@ IN THE SOFTWARE.
 	};
 
 
+    // - - - - - - - - - - -
 	// The inimitable Log5 ...
+    // - - - - - - - - - - -
 	(function() {
 		var util = null;
 		var style = null;
@@ -900,22 +902,17 @@ IN THE SOFTWARE.
 	})();
 
 
-	// Make all the sleepless functions/objects into globals (if you feel you must, and I often do)
-	M.globalize = function() {
-		for( const k in M ) {
-			globalThis[ k ] = M[ k ];
-		}
-        return M;
-	};
-
 
 	if( isNode ) {
 
+        // - - - - - - - - - - -
 		// Node.js only stuff
+        // - - - - - - - - - - -
 
 		const fs = require("fs");
 		const crypto = require("crypto");
 		const https = require("https");
+
 
 		// Read a file from disk
 		// Reads async if callback cb is provided,
@@ -927,8 +924,7 @@ IN THE SOFTWARE.
 			fs.readFile(path, enc, cb);
 		};
 
-		// DEPRECATE in favor of get_file();
-		M.getFile = M.get_file;
+		M.getFile = M.get_file; // DEPRECATE in favor of get_file();
 
 
 		// get fs stat object
@@ -985,9 +981,12 @@ IN THE SOFTWARE.
 		};
 
 		M.rand_hash = function( salt = "" ) {
-			return M.sha1( salt + ( Date.now() + M.time() ) );
+            return M.sha1( "" + ( Date.now() + Math.random() ) );
+			//return M.sha1( salt + ( Date.now() + M.time() ) );
 		};
 
+        M.DS = require( "ds" );
+        /*
 		// DS (datastore)
 		(function() {
 			const load = function( f ) {
@@ -1029,8 +1028,10 @@ IN THE SOFTWARE.
 			D.prototype = new F();
 			M.DS = D
 		})();
+        */
 
 
+        // XXX deprecate - fetch()?
 		M.rpc = function( url, data, okay = ()=>{}, fail = ()=>{}, _get = false, _redirects = 0 ) {
 			if( _get ) {	// if using GET ...
 				// add the data to the URL as query args
@@ -1089,6 +1090,7 @@ IN THE SOFTWARE.
 		};
 
 
+        // XXX deprecate - fetch()?
 		M.rpc2 = function( url, opts, data, okay = ()=>{}, fail = ()=>{}, _redirects = 0 ) {
 
 			// check for looping
@@ -1172,10 +1174,13 @@ IN THE SOFTWARE.
 
         M.sessions = require( "sleepless-sessions" );
 
-        M.db = require( "db" );
+        //M.db = require( "db" );
 
 	} else {
+
+        // - - - - - - - - - - -
 		// Browser only stuff
+        // - - - - - - - - - - -
 
 		M.LS = {
 			// XXX Add ttl feature
@@ -1428,7 +1433,7 @@ IN THE SOFTWARE.
 			}
 		};
 
-        // fire a change event on an element
+        // fire a fake change event on an element
         HTMLElement.prototype.change = function() {
             const evt = new Event( "change" );
             this.dispatchEvent( evt );
@@ -1648,6 +1653,7 @@ IN THE SOFTWARE.
 
 		// Lets you navigate through pseudo-pages within an actual page
 		// without any actual document fetching from the server.
+        // XXX deprecate in favor of navigate
 		M.Nav = function(data, new_show) {
 
 			if(typeof data === "function") {
@@ -1727,10 +1733,10 @@ IN THE SOFTWARE.
 
 		// Lets you navigate through pseudo-pages within an actual page
 		// without any actual document fetching from the server.
-        // Nav( data_object )
-        // Nav( data_object, show_function )
-        // Nav( show_function )
-		M.Nav2 = function( data, new_show ) {
+        // navigate( data_object )
+        // navigate( data_object, show_function )
+        // navigate( show_function )
+		M.navigate = function( data, new_show ) {
 
 			if( typeof data === "function" ) {
 				new_show = data;
@@ -1821,10 +1827,13 @@ IN THE SOFTWARE.
 			Nav2.current_show( data );
 		};
 
+        M.Nav2 = M.navigate // XXX Deprecate in favor of navigate()
+
 
 		// Ties a Javascript object to some user interface elements in the browser DOM.
 		// If anything changes in the data object then mod_cb is called.
 		// XXX Not great. Don't recommend using this
+        // XXX Deprecate
 		M.MXU = function( base, data, mod_cb ) {
 
 			const form_types = "input select textarea".toUpperCase().split( " " );
@@ -2036,6 +2045,16 @@ IN THE SOFTWARE.
 
 
 	}
+
+
+	// Make all the sleepless functions/objects into globals
+    // (if you feel you must, and I often do)
+	M.globalize = function() {
+		for( const k in M ) {
+			globalThis[ k ] = M[ k ];
+		}
+        return M;
+	};
 
 
 	if(isNode) {
