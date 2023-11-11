@@ -19,9 +19,10 @@ throwIf( toInt(3) !== 3 );
 throwIf( toInt(3.0) !== 3 );
 throwIf( toInt("3") !== 3 );
 throwIf( toInt("1,234") !== 1234 );
-throwIf( toInt("1,234.56") !== 1234 );
-throwIf( toInt("-1,234.56") !== -1234 );
-throwIf( toInt(-1234.56) !== -1234 );
+
+throwIf( toInt("1,234.56") !== 1235 );
+throwIf( toInt("-1,234.56") !== -1235 );
+throwIf( toInt(-1234.56) !== -1235 );
 
 throwIf( toFlt(3) !== 3 );
 throwIf( toFlt(3.0) !== 3 );
@@ -43,8 +44,7 @@ throwIf( b2c("1,234") !== 123400 );
 throwIf( b2c("0.01") !== 1 );
 throwIf( b2c("0.01") !== 1 );
 
-l(numFmt(0))
-throwIf( numFmt(0) !== "0" );
+throwIf( numFmt(0) !== "0", "foo" );
 throwIf( numFmt(0, 1) !== "0.0" );
 throwIf( numFmt(0, 4) !== "0.0000" );
 throwIf( numFmt(1, 4) !== "1.0000" );
