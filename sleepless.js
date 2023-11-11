@@ -28,21 +28,21 @@ IN THE SOFTWARE.
 
 	let M = {};
 
-	let isBrowser = typeof global === "undefined";
-	let isNode = ! isBrowser;
+
+    const isNode = M.isNode = ( typeof process == "object" && /^v\d+\.\d+\.\d+$/.test( process.version ) );
+	const isBrowser = M.isBrowser = ! isNode; 
+
 
 	// for convenience
-	M.log = function(m) {
-		if(isBrowser && window["console"] === undefined) {
-			return;		// console doesn't exist in IE unless in debug mode
-		}
-		if(typeof m === "object") {
+    // XXX handle multi-args
+	M.log = function( m ) {
+		if( typeof m === "object" ) {
 			return console.dir( m );
 		}
-		return console.log(m);
+		return console.log( m );
 	}
 
-	// throw an error if a condition is true
+	// throw an Error if a condition is true
 	M.throwIf = function(c, s) { if(c) { throw new Error(s || "FAILED ASSERTION"); } }
 
 
@@ -50,20 +50,23 @@ IN THE SOFTWARE.
 	M.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 
 	// convert and return object as JSON or null if exception
-	M.o2j = function(v, r, s) { try { return JSON.stringify(v, r, s) } catch(e) { return null } }
+	M.o2j = function(v, r = null, s = 2) { try { return JSON.stringify(v, r, s) } catch(e) { return null } }
 
 
 	// convert whatever to float or 0 if not at all numberlike
 	// E.g. "123.9" --> 123.9, null --> 0.0, undefined --> 0.0, NaN --> 0.0, 123.9 --> 123.9
+    // XXX Not ideal: This coerces to string, then strips out extraneous chars
 	M.toFlt = function(v) {
 		return parseFloat((""+v).replace(/[^-.0-9]/g, "")) || 0.0;
 	}
 
 	// convert whatever to integer or 0 if not at all numberlike
 	// E.g. "123" --> 123, null --> 0, undefined --> 0, NaN --> 0, 123 --> 123, -123.9 --> -124
+    // XXX Not ideal: see above
 	M.toInt = function(v) {
 		var n = M.toFlt(v);
-		return Math[n < 0 ? 'ceil' : 'floor'](n);
+		//return Math[n < 0 ? 'ceil' : 'floor'](n);
+		return Math.round( n );
 	};
 
 
@@ -73,6 +76,7 @@ IN THE SOFTWARE.
 		return M.toFlt( M.toInt(cents) / 100 );
 	}
 	M.c2b = M.centsToBucks;
+
 
 	// convert dollars to pennies
 	// E.g.  1234.56 --> 123456
@@ -419,7 +423,7 @@ IN THE SOFTWARE.
 
 	// Returns true if string contains all of the arguments irrespective of case
 	// "I,\nhave a lovely bunch of coconuts".looksLike("i have", "coconuts") == true
-	String.prototype.looksLike = function() {
+	String.prototype.looks_like = function() {
 		var a = Array.prototype.slice.call(arguments);        // convert arguments to true array
 		var s = "_" + this.toId() + "_"; //.split("_"); //toLowerCase();
 		for(var i = 0; i < a.length; i++) {
@@ -429,6 +433,7 @@ IN THE SOFTWARE.
 		}
 		return true;
 	}
+    String.prototype.looksLike = String.prototype.looks_like;   // Deprecate
 
 	// Replaces instances of "__key__" in string s,
 	// with the values from corresponding key in data.
@@ -455,7 +460,7 @@ IN THE SOFTWARE.
 	// E.M. agoStr( time() - 60 ) 	// "60 seconds ago"
 	// E.M. agoStr( time() - 63 ) 	// "1 minute ago"
 	// Pass a truthy value for argument 'no_suffix' to suppress the " ago" at the end
-	M.agoStr = function(ts, no_suffix) {
+	M.ago_str = function(ts, no_suffix) {
 		if(ts == 0)
 			return "";
 
@@ -479,6 +484,7 @@ IN THE SOFTWARE.
 
 		return v + (no_suffix ? "" : " ago");
 	}
+    M.agoStr = M.ago_str;   // deprecate
 
 	
 	// Run some functions in parallel / simultaneously
@@ -2060,7 +2066,7 @@ IN THE SOFTWARE.
 	if(isNode) {
 		module.exports = M;
 	} else {
-		window.sleepless = M;
+		globalThis.sleepless = M;
 	}
 
 

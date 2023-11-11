@@ -1,13 +1,16 @@
 
-let isBrowser = typeof global === "undefined";
-let isNode = ! isBrowser;
+const isNode = ( typeof process == "object" && /^v\d+\.\d+\.\d+$/.test( process.version ) );
+const isBrowser = ! isNode; 
 
-var l = console.log
-import sleepless from "./sleepless.js";
-sleepless.globalize();
+if( isNode ) {
+    sleepless = require( "." ).globalize()
+} else {
+    sleepless = sleepless.globalize();
+}
+const l = log;
 
 const o = { a:[1,2,3], t:true, f:false, o:{key:'val'}, pi:3.1415, n:null };
-const j = JSON.stringify(o);
+const j = JSON.stringify(o, null, 2);
 
 throwIf( o2j(o) !== j );
 throwIf( o2j(j2o(j)) !== j );
@@ -40,6 +43,7 @@ throwIf( b2c("1,234") !== 123400 );
 throwIf( b2c("0.01") !== 1 );
 throwIf( b2c("0.01") !== 1 );
 
+l(numFmt(0))
 throwIf( numFmt(0) !== "0" );
 throwIf( numFmt(0, 1) !== "0.0" );
 throwIf( numFmt(0, 4) !== "0.0000" );
