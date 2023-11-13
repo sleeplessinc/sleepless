@@ -1,6 +1,6 @@
 {
   "name": "sleepless",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "description": "Sleepless Software Inc. Javascript Library",
   "main": "sleepless.js",
   "scripts": {
@@ -20,6 +20,6 @@
     "db": "^4.0.1",
     "ds": "^2.0.0",
     "sleepless-components": "^1.0.0",
-    "sleepless-sessions": "^1.2.0"
+    "sleepless-sessions": "^1.3.0"
   }
 }
