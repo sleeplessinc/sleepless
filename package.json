@@ -20,6 +20,6 @@
     "db": "^4.0.1",
     "ds": "^2.0.2",
     "sleepless-components": "^1.0.0",
-    "sleepless-sessions": "^1.5.2"
+    "sleepless-sessions": "^1.5.3"
   }
 }
