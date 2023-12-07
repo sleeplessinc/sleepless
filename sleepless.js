@@ -991,7 +991,7 @@ IN THE SOFTWARE.
 			//return M.sha1( salt + ( Date.now() + M.time() ) );
 		};
 
-        M.DS = require( "ds" );
+        //M.DS = require( "ds" );
         /*
 		// DS (datastore)
 		(function() {
@@ -1178,7 +1178,7 @@ IN THE SOFTWARE.
 		};*/
 
 
-        M.sessions = require( "sleepless-sessions" );
+        //M.sessions = require( "sleepless-sessions" );
 
         //M.db = require( "db" );
 
@@ -1993,6 +1993,7 @@ IN THE SOFTWARE.
 		};
 
 
+        /*
         // Joe's experimental components system for browser
         (function() {
 
@@ -2048,6 +2049,7 @@ IN THE SOFTWARE.
             M.components = { inject, find, };
 
         } )();
+        */
 
 
 	}

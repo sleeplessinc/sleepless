@@ -1,6 +1,6 @@
 {
   "name": "sleepless",
-  "version": "6.1.5",
+  "version": "6.2.0",
   "description": "Sleepless Software Inc. Javascript Library",
   "main": "sleepless.js",
   "scripts": {
@@ -17,9 +17,6 @@
   },
   "homepage": "https://github.com/sleeplessinc/sleepless#readme",
   "dependencies": {
-    "db": "^4.0.1",
-    "ds": "^2.0.2",
-    "sleepless-components": "^1.0.0",
-    "sleepless-sessions": "^1.5.3"
+    "sleepless-components": "^1.0.0"
   }
 }
